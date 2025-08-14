@@ -1,48 +1,10 @@
-// import express from 'express';
-// import nodemailer from 'nodemailer';
-// import dotenv from 'dotenv';
-
-// dotenv.config();
-// const app = express();
-// app.use(express.json());
-
-// // Email sending endpoint
-// app.post('/send-email', async (req, res) => {
-//   const { to, subject, text } = req.body;
-
-//   try {
-//     // Create transporter
-//     const transporter = nodemailer.createTransport({
-//       service: 'gmail', // Or SMTP details
-//       auth: {
-//         user: process.env.SMTP_USERNAME,
-//         pass: process.env.SMTP_PASSWORD
-//       }
-//     });
-
-//     // Send email
-//     await transporter.sendMail({
-//       from: process.env.SMTP_USERNAME,
-//       to,
-//       subject,
-//       text
-//     });
-
-//     res.json({ success: true, message: 'Email sent successfully!' });
-//   } catch (error) {
-//     console.error('Email error:', error);
-//     res.status(500).json({ success: false, error: error.message });
-//   }
-// });
-
-// const PORT = process.env.PORT || 3000;
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
 const express = require('express');
 const admin = require('firebase-admin');
 const cron = require('node-cron');
 const dotenv = require('dotenv');
+const wishrouter = require('./router/sendmail');
+const { errorResponse } = require('./controller/ErrorSuccessResponse');
+const createError = require("http-errors");
 
 dotenv.config();
 const app = express();
@@ -65,26 +27,39 @@ const messaging = admin.messaging();
 
 // ===== Config =====
 const TEST_MODE = process.env.TEST_MODE === 'true';
-const CRON_SCHEDULE = TEST_MODE ? '* * * * *' : '0 9 * * *'; // Every min in test, 9 AM in prod
+const CRON_SCHEDULE = TEST_MODE ? '* * * * *' : '41 15 * * *';
+const TIMEZONE = process.env.TIMEZONE || 'Asia/Kolkata'; // set your local timezone
+
+app.use('/sendBirthdayWish', wishrouter);
+
+
+app.get('/check-testing', async (req, res) => {
+  try {
+    await checkBirthdays();
+    res.send('✅ Birthday check done.');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('❌ Error running birthday check.');
+  }
+});
 
 // ===== Add birthday =====
 app.post('/add-birthday', async (req, res) => {
   try {
-    const { name, date, fcmToken } = req.body;
-    if (!name || !date || !fcmToken) {
+    const { name, month, day, fcmToken } = req.body;
+    if (!name || !month || !day || !fcmToken) {
       return res.status(400).json({ error: 'Missing fields' });
     }
 
-    const triggerDate = new Date(date);
-
     await db.collection('birthdays').add({
       name,
-      date: triggerDate.toISOString(),
+      month: parseInt(month),
+      day: parseInt(day),
       fcmToken,
       lastNotified: null
     });
 
-    console.log(`📅 Birthday for ${name} saved with date: ${triggerDate}`);
+    console.log(`📅 Birthday for ${name} saved: ${month}-${day}`);
     res.json({ message: 'Birthday saved!' });
   } catch (err) {
     console.error(err);
@@ -93,10 +68,10 @@ app.post('/add-birthday', async (req, res) => {
 });
 
 // ===== Helper =====
-function daysUntilBirthday(birthdayDate, now) {
+function daysUntilBirthday(month, day, now) {
   const thisYear = now.getFullYear();
   const today = new Date(thisYear, now.getMonth(), now.getDate());
-  let nextBirthday = new Date(thisYear, birthdayDate.getMonth(), birthdayDate.getDate());
+  let nextBirthday = new Date(thisYear, month - 1, day);
 
   if (nextBirthday < today) {
     nextBirthday.setFullYear(thisYear + 1);
@@ -106,18 +81,22 @@ function daysUntilBirthday(birthdayDate, now) {
   return Math.floor(diffTime / (1000 * 60 * 60 * 24));
 }
 
+function getLocalDateString(date) {
+  return date.toLocaleDateString('en-CA', { timeZone: TIMEZONE }); // YYYY-MM-DD
+}
+
 // ===== Main check =====
 async function checkBirthdays() {
   const now = new Date();
-  console.log(`⏳ Checking birthdays at ${now}`);
+  console.log(`⏳ Checking birthdays at ${now.toLocaleString('en-IN', { timeZone: TIMEZONE })}`);
 
   const snapshot = await db.collection('birthdays').get();
-  snapshot.forEach(async doc => {
-    const data = doc.data();
-    const { name, date, fcmToken, lastNotified } = data;
-    const birthdayDate = new Date(date);
 
-    const daysLeft = daysUntilBirthday(birthdayDate, now);
+  await Promise.all(snapshot.docs.map(async doc => {
+    const data = doc.data();
+    const { name, month, day, fcmToken, lastNotified } = data;
+
+    const daysLeft = daysUntilBirthday(month, day, now);
 
     let message = null;
     if (daysLeft === 2) message = `⏳ Only 2 days left for ${name}'s birthday!`;
@@ -125,13 +104,17 @@ async function checkBirthdays() {
     else if (daysLeft === 0) message = `🎂 Today is ${name}'s birthday! 🎉`;
 
     if (message) {
-      const todayStr = now.toISOString().split('T')[0];
+      const todayStr = getLocalDateString(now);
       if (lastNotified !== todayStr) {
-        await sendNotification(fcmToken, message);
-        await doc.ref.update({ lastNotified: todayStr });
+        const sent = await sendNotification(fcmToken, message);
+        if (sent) {
+          await doc.ref.update({ lastNotified: todayStr });
+        } else {
+          await doc.ref.delete(); // remove if token is bad
+        }
       }
     }
-  });
+  }));
 }
 
 // ===== Send notification =====
@@ -145,13 +128,36 @@ async function sendNotification(fcmToken, body) {
       }
     });
     console.log(`✅ Notification sent: ${body}`);
+    return true;
   } catch (err) {
-    console.error('❌ Error sending notification', err);
+    console.error('❌ Error sending notification', err.code || err.message);
+    if (err.code === 'messaging/registration-token-not-registered') {
+      console.warn('⚠️ Token expired, removing from DB.');
+      return false;
+    }
+    return false;
   }
 }
 
 // ===== Schedule job =====
-cron.schedule(CRON_SCHEDULE, checkBirthdays);
+cron.schedule(CRON_SCHEDULE, checkBirthdays, {
+  timezone: TIMEZONE
+});
+
+// Client error handling
+app.use((req, res, next) => {
+  const err = createError(404, "Route not found");
+  next(err);
+});
+
+// Server error handling
+app.use((err, req, res, next) => {
+  return errorResponse(res, {
+    statusCode: err.status || 500,
+    message: err.message || "Internal Server Error",
+  });
+});
+
 
 // ===== Start server =====
 app.listen(process.env.PORT || 5000, () => {

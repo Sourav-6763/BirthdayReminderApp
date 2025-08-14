@@ -31,6 +31,25 @@ const CRON_SCHEDULE = TEST_MODE ? '* * * * *' : '41 15 * * *';
 const TIMEZONE = process.env.TIMEZONE || 'Asia/Kolkata'; // set your local timezone
 
 app.use('/sendBirthdayWish', wishrouter);
+// ===== Delete birthday =====
+app.delete('/delete-birthday/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const docRef = db.collection('birthdays').doc(id);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      return res.status(404).json({ error: 'Birthday not found' });
+    }
+
+    await docRef.delete();
+    console.log(`🗑️ Deleted birthday ID: ${id}`);
+    res.json({ message: 'Birthday deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete birthday' });
+  }
+});
 
 
 app.get('/check-testing', async (req, res) => {
@@ -51,7 +70,7 @@ app.post('/add-birthday', async (req, res) => {
       return res.status(400).json({ error: 'Missing fields' });
     }
 
-    await db.collection('birthdays').add({
+    const ref =await db.collection('birthdays').add({
       name,
       month: parseInt(month),
       day: parseInt(day),
@@ -60,7 +79,7 @@ app.post('/add-birthday', async (req, res) => {
     });
 
     console.log(`📅 Birthday for ${name} saved: ${month}-${day}`);
-    res.json({ message: 'Birthday saved!' });
+    res.json({ message: 'Birthday saved!', id: ref.id });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to save birthday' });

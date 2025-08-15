@@ -27,7 +27,7 @@ const messaging = admin.messaging();
 
 // ===== Config =====
 const TEST_MODE = process.env.TEST_MODE === 'true';
-const CRON_SCHEDULE = TEST_MODE ? '* * * * *' : '50 23 * * *';
+const CRON_SCHEDULE = TEST_MODE ? '* * * * *' : '20 0 * * *';
 const TIMEZONE = process.env.TIMEZONE || 'Asia/Kolkata'; // set your local timezone
 
 app.use('/sendBirthdayWish', wishrouter);
@@ -43,26 +43,33 @@ app.delete('/delete-birthday/:id', async (req, res) => {
     }
 
     await docRef.delete();
-    console.log(`🗑️ Deleted birthday ID: ${id}`);
+    // console.log(`🗑️ Deleted birthday ID: ${id}`);
     res.json({ message: 'Birthday deleted successfully' });
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ error: 'Failed to delete birthday' });
   }
 });
 
+// ===== Health check helper =====
+function getHealthStatus() {
+  return {
+    status: "ok",
+    uptime: process.uptime()
+  };
+}
+
+
 
 app.get('/check-testing', (req, res) => {
-  // Respond immediately to cron-job.org
-  res.status(200)
-    .type('text/plain')
-    .send('✅ Birthday check started');
+  // Respond immediately
+  res.status(200).json(getHealthStatus());
 
-  // Run the check in background (non-blocking)
+  // Run birthday check in the background (non-blocking)
   setImmediate(() => {
     checkBirthdays()
-      .then(() => console.log('🎉 Birthday check completed'))
-      .catch(err => console.error('❌ Birthday check failed', err));
+      .then(() => console.log('🎉 Birthday check completed via health ping'))
+      .catch(err => console.error('❌ Birthday check failed via health ping', err));
   });
 });
 
@@ -84,10 +91,10 @@ app.post('/add-birthday', async (req, res) => {
       lastNotified: null
     });
 
-    console.log(`📅 Birthday for ${name} saved: ${month}-${day}`);
+    // console.log(`📅 Birthday for ${name} saved: ${month}-${day}`);
     res.json({ message: 'Birthday saved!', id: ref.id });
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ error: 'Failed to save birthday' });
   }
 });
@@ -113,7 +120,7 @@ function getLocalDateString(date) {
 // ===== Main check =====
 async function checkBirthdays() {
   const now = new Date();
-  console.log(`⏳ Checking birthdays at ${now.toLocaleString('en-IN', { timeZone: TIMEZONE })}`);
+  // console.log(`⏳ Checking birthdays at ${now.toLocaleString('en-IN', { timeZone: TIMEZONE })}`);
 
   // Dates we care about
   const todayMonth = now.getMonth() + 1;
@@ -181,12 +188,12 @@ async function sendNotification(fcmToken, body) {
         body
       }
     });
-    console.log(`✅ Notification sent: ${body}`);
+    // console.log(`✅ Notification sent: ${body}`);
     return true;
   } catch (err) {
     console.error('❌ Error sending notification', err.code || err.message);
     if (err.code === 'messaging/registration-token-not-registered') {
-      console.warn('⚠️ Token expired, removing from DB.');
+      // console.warn('⚠️ Token expired, removing from DB.');
       return false;
     }
     return false;

@@ -27,7 +27,7 @@ const messaging = admin.messaging();
 
 // ===== Config =====
 const TEST_MODE = process.env.TEST_MODE === 'true';
-const CRON_SCHEDULE = TEST_MODE ? '* * * * *' : '50 19 * * *';
+const CRON_SCHEDULE = TEST_MODE ? '* * * * *' : '50 21 * * *';
 const TIMEZONE = process.env.TIMEZONE || 'Asia/Kolkata'; // set your local timezone
 
 app.use('/sendBirthdayWish', wishrouter);

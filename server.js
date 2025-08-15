@@ -27,7 +27,7 @@ const messaging = admin.messaging();
 
 // ===== Config =====
 const TEST_MODE = process.env.TEST_MODE === 'true';
-const CRON_SCHEDULE = TEST_MODE ? '* * * * *' : '0 18 * * *';
+const CRON_SCHEDULE = TEST_MODE ? '* * * * *' : '15 19 * * *';
 const TIMEZONE = process.env.TIMEZONE || 'Asia/Kolkata'; // set your local timezone
 
 app.use('/sendBirthdayWish', wishrouter);
@@ -51,23 +51,19 @@ app.delete('/delete-birthday/:id', async (req, res) => {
   }
 });
 
-app.get('/check-testing', async (req, res) => {
+
+  app.get('/check-testing', async (req, res) => {
   try {
     await checkBirthdays();
-
-    // Always return small, plain text response
-    res.status(200)
-       .type('text/plain')
-       .send('✅ Birthday check triggered successfully');
   } catch (err) {
-    console.error(err);
-
-    res.status(500)
-       .type('text/plain')
-       .send('❌ Error running birthday check');
+    console.error('Error in checkBirthdays:', err);
   }
-});
 
+  // Always send small response to cron-job.org
+  res.status(200)
+     .type('text/plain')
+     .send('OK');
+});
 
 
 // ===== Add birthday =====

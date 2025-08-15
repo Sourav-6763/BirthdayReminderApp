@@ -52,18 +52,20 @@ app.delete('/delete-birthday/:id', async (req, res) => {
 });
 
 
-  app.get('/check-testing', async (req, res) => {
-  try {
-    await checkBirthdays();
-  } catch (err) {
-    console.error('Error in checkBirthdays:', err);
-  }
-
-  // Always send small response to cron-job.org
+app.get('/check-testing', (req, res) => {
+  // Respond immediately to cron-job.org
   res.status(200)
-     .type('text/plain')
-     .send('OK');
+    .type('text/plain')
+    .send('✅ Birthday check started');
+
+  // Run the check in background (non-blocking)
+  setImmediate(() => {
+    checkBirthdays()
+      .then(() => console.log('🎉 Birthday check completed'))
+      .catch(err => console.error('❌ Birthday check failed', err));
+  });
 });
+
 
 
 // ===== Add birthday =====

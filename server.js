@@ -27,7 +27,7 @@ const messaging = admin.messaging();
 
 // ===== Config =====
 const TEST_MODE = process.env.TEST_MODE === 'true';
-const CRON_SCHEDULE = TEST_MODE ? '* * * * *' : '20 0 * * *';
+const CRON_SCHEDULE = TEST_MODE ? '* * * * *' : '0 9 * * *';
 const TIMEZONE = process.env.TIMEZONE || 'Asia/Kolkata'; // set your local timezone
 
 app.use('/sendBirthdayWish', wishrouter);
@@ -117,65 +117,100 @@ function getLocalDateString(date) {
   return date.toLocaleDateString('en-CA', { timeZone: TIMEZONE }); // YYYY-MM-DD
 }
 
-// ===== Main check =====
+
+
 async function checkBirthdays() {
   const now = new Date();
   // console.log(`⏳ Checking birthdays at ${now.toLocaleString('en-IN', { timeZone: TIMEZONE })}`);
 
-  // Dates we care about
-  const todayMonth = now.getMonth() + 1;
-  const todayDay = now.getDate();
+  const snapshot = await db.collection('birthdays').get();
 
-  const oneDayLater = new Date(now);
-  oneDayLater.setDate(now.getDate() + 1);
-  const oneDayMonth = oneDayLater.getMonth() + 1;
-  const oneDayDay = oneDayLater.getDate();
+  await Promise.all(snapshot.docs.map(async doc => {
+    const data = doc.data();
+    const { name, month, day, fcmToken, lastNotified } = data;
 
-  const twoDaysLater = new Date(now);
-  twoDaysLater.setDate(now.getDate() + 2);
-  const twoDaysMonth = twoDaysLater.getMonth() + 1;
-  const twoDaysDay = twoDaysLater.getDate();
+    const daysLeft = daysUntilBirthday(month, day, now);
 
-  // Combine all target dates
-  const targetDates = [
-    { month: todayMonth, day: todayDay },
-    { month: oneDayMonth, day: oneDayDay },
-    { month: twoDaysMonth, day: twoDaysDay },
-  ];
+    let message = null;
+    if (daysLeft === 2) message = `⏳ Only 2 days left for ${name}'s birthday!`;
+    else if (daysLeft === 1) message = `🎈 Only 1 day left for ${name}'s birthday!`;
+    else if (daysLeft === 0) message = `🎂 Today is ${name}'s birthday! 🎉`;
 
-  // Run one query per date (Firestore limitation — no OR for two fields in one query)
-  for (const date of targetDates) {
-    const snapshot = await db.collection('birthdays')
-      .where('month', '==', date.month)
-      .where('day', '==', date.day)
-      .get();
-
-    if (snapshot.empty) continue;
-
-    await Promise.all(snapshot.docs.map(async doc => {
-      const data = doc.data();
-      const { name, month, day, fcmToken, lastNotified } = data;
-
-      const daysLeft = daysUntilBirthday(month, day, now);
-      let message = null;
-      if (daysLeft === 2) message = `⏳ Only 2 days left for ${name}'s birthday!`;
-      else if (daysLeft === 1) message = `🎈 Only 1 day left for ${name}'s birthday!`;
-      else if (daysLeft === 0) message = `🎂 Today is ${name}'s birthday! 🎉`;
-
-      if (message) {
-        const todayStr = getLocalDateString(now);
-        if (lastNotified !== todayStr) {
-          const sent = await sendNotification(fcmToken, message);
-          if (sent) {
-            await doc.ref.update({ lastNotified: todayStr });
-          } else {
-            await doc.ref.delete(); // remove if token is bad
-          }
+    if (message) {
+      const todayStr = getLocalDateString(now);
+      if (lastNotified !== todayStr) {
+        const sent = await sendNotification(fcmToken, message);
+        if (sent) {
+          await doc.ref.update({ lastNotified: todayStr });
+        } else {
+          await doc.ref.delete(); // remove if token is bad
         }
       }
-    }));
-  }
-}
+    }
+  }));
+} 
+
+// ===== Main check =====
+
+
+// async function checkBirthdays() {
+//   const now = new Date();
+//   // console.log(`⏳ Checking birthdays at ${now.toLocaleString('en-IN', { timeZone: TIMEZONE })}`);
+
+//   // Dates we care about
+//   const todayMonth = now.getMonth() + 1;
+//   const todayDay = now.getDate();
+
+//   const oneDayLater = new Date(now);
+//   oneDayLater.setDate(now.getDate() + 1);
+//   const oneDayMonth = oneDayLater.getMonth() + 1;
+//   const oneDayDay = oneDayLater.getDate();
+
+//   const twoDaysLater = new Date(now);
+//   twoDaysLater.setDate(now.getDate() + 2);
+//   const twoDaysMonth = twoDaysLater.getMonth() + 1;
+//   const twoDaysDay = twoDaysLater.getDate();
+
+//   // Combine all target dates
+//   const targetDates = [
+//     { month: todayMonth, day: todayDay },
+//     { month: oneDayMonth, day: oneDayDay },
+//     { month: twoDaysMonth, day: twoDaysDay },
+//   ];
+
+//   // Run one query per date (Firestore limitation — no OR for two fields in one query)
+//   for (const date of targetDates) {
+//     const snapshot = await db.collection('birthdays')
+//       .where('month', '==', date.month)
+//       .where('day', '==', date.day)
+//       .get();
+
+//     if (snapshot.empty) continue;
+
+//     await Promise.all(snapshot.docs.map(async doc => {
+//       const data = doc.data();
+//       const { name, month, day, fcmToken, lastNotified } = data;
+
+//       const daysLeft = daysUntilBirthday(month, day, now);
+//       let message = null;
+//       if (daysLeft === 2) message = `⏳ Only 2 days left for ${name}'s birthday!`;
+//       else if (daysLeft === 1) message = `🎈 Only 1 day left for ${name}'s birthday!`;
+//       else if (daysLeft === 0) message = `🎂 Today is ${name}'s birthday! 🎉`;
+
+//       if (message) {
+//         const todayStr = getLocalDateString(now);
+//         if (lastNotified !== todayStr) {
+//           const sent = await sendNotification(fcmToken, message);
+//           if (sent) {
+//             await doc.ref.update({ lastNotified: todayStr });
+//           } else {
+//             await doc.ref.delete(); // remove if token is bad
+//           }
+//         }
+//       }
+//     }));
+//   }
+// }
 
 
 // ===== Send notification =====

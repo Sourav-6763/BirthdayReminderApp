@@ -60,8 +60,16 @@ function getHealthStatus() {
   };
 }
 
-app.get('/check-testing', (req, res) => {
+   app.get('/check-testing', (req, res) => {
+  // Respond immediately with health status
   res.status(200).json(getHealthStatus());
+
+  // Run birthday check in the background (non-blocking)
+  setImmediate(() => {
+    checkBirthdays()
+      .then(() => console.log('🎉 Birthday check completed via health ping'))
+      .catch(err => console.error('❌ Birthday check failed via health ping', err));
+  });
 });
 
 

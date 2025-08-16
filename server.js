@@ -60,7 +60,7 @@ function getHealthStatus() {
   };
 }
 
-app.get('/health', (req, res) => {
+app.get('/check-testing', (req, res) => {
   res.status(200).json(getHealthStatus());
 });
 

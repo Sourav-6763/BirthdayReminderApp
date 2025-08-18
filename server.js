@@ -28,9 +28,11 @@ const messaging = admin.messaging();
 // ===== Config =====
 const TEST_MODE = process.env.TEST_MODE === 'true';
 const CRON_SCHEDULE = TEST_MODE ? '* * * * *' : '0 9 * * *';
-const TIMEZONE = process.env.TIMEZONE || 'Asia/Kolkata'; // set your local timezone
+const TIMEZONE = process.env.TIMEZONE || 'Asia/Kolkata';
 
+// ===== Routers =====
 app.use('/sendBirthdayWish', wishrouter);
+
 // ===== Delete birthday =====
 app.delete('/delete-birthday/:id', async (req, res) => {
   try {
@@ -43,15 +45,13 @@ app.delete('/delete-birthday/:id', async (req, res) => {
     }
 
     await docRef.delete();
-    // console.log(`🗑️ Deleted birthday ID: ${id}`);
     res.json({ message: 'Birthday deleted successfully' });
   } catch (err) {
-    // console.error(err);
     res.status(500).json({ error: 'Failed to delete birthday' });
   }
 });
 
-// ===== Health check helper =====
+// ===== Health check =====
 function getHealthStatus() {
   return {
     status: "ok",
@@ -59,21 +59,15 @@ function getHealthStatus() {
   };
 }
 
-
-
 app.get('/check-testing', (req, res) => {
-  // Respond immediately
   res.status(200).json(getHealthStatus());
 
-  // Run birthday check in the background (non-blocking)
   setImmediate(() => {
     checkBirthdays()
       .then(() => console.log('🎉 Birthday check completed via health ping'))
       .catch(err => console.error('❌ Birthday check failed via health ping', err));
   });
 });
-
-
 
 // ===== Add birthday =====
 app.post('/add-birthday', async (req, res) => {
@@ -83,7 +77,7 @@ app.post('/add-birthday', async (req, res) => {
       return res.status(400).json({ error: 'Missing fields' });
     }
 
-    const ref =await db.collection('birthdays').add({
+    const ref = await db.collection('birthdays').add({
       name,
       month: parseInt(month),
       day: parseInt(day),
@@ -91,38 +85,39 @@ app.post('/add-birthday', async (req, res) => {
       lastNotified: null
     });
 
-    // console.log(`📅 Birthday for ${name} saved: ${month}-${day}`);
     res.json({ message: 'Birthday saved!', id: ref.id });
   } catch (err) {
-    // console.error(err);
     res.status(500).json({ error: 'Failed to save birthday' });
   }
 });
 
-// ===== Helper =====
+// ===== Helpers =====
 function daysUntilBirthday(month, day, now) {
   const thisYear = now.getFullYear();
-  const today = new Date(thisYear, now.getMonth(), now.getDate());
+
+  // Convert to local timezone date (strip time part)
+  const today = new Date(
+    new Date(now.toLocaleString("en-US", { timeZone: TIMEZONE })).setHours(0, 0, 0, 0)
+  );
+
   let nextBirthday = new Date(thisYear, month - 1, day);
 
+  // If birthday already passed this year → set to next year
   if (nextBirthday < today) {
     nextBirthday.setFullYear(thisYear + 1);
   }
 
   const diffTime = nextBirthday - today;
-  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return Math.round(diffTime / (1000 * 60 * 60 * 24)); // ✅ use round instead of floor
 }
 
 function getLocalDateString(date) {
   return date.toLocaleDateString('en-CA', { timeZone: TIMEZONE }); // YYYY-MM-DD
 }
 
-
-
+// ===== Check birthdays =====
 async function checkBirthdays() {
   const now = new Date();
-  // console.log(`⏳ Checking birthdays at ${now.toLocaleString('en-IN', { timeZone: TIMEZONE })}`);
-
   const snapshot = await db.collection('birthdays').get();
 
   await Promise.all(snapshot.docs.map(async doc => {
@@ -143,75 +138,12 @@ async function checkBirthdays() {
         if (sent) {
           await doc.ref.update({ lastNotified: todayStr });
         } else {
-          await doc.ref.delete(); // remove if token is bad
+          await doc.ref.delete(); // bad token cleanup
         }
       }
     }
   }));
-} 
-
-// ===== Main check =====
-
-
-// async function checkBirthdays() {
-//   const now = new Date();
-//   // console.log(`⏳ Checking birthdays at ${now.toLocaleString('en-IN', { timeZone: TIMEZONE })}`);
-
-//   // Dates we care about
-//   const todayMonth = now.getMonth() + 1;
-//   const todayDay = now.getDate();
-
-//   const oneDayLater = new Date(now);
-//   oneDayLater.setDate(now.getDate() + 1);
-//   const oneDayMonth = oneDayLater.getMonth() + 1;
-//   const oneDayDay = oneDayLater.getDate();
-
-//   const twoDaysLater = new Date(now);
-//   twoDaysLater.setDate(now.getDate() + 2);
-//   const twoDaysMonth = twoDaysLater.getMonth() + 1;
-//   const twoDaysDay = twoDaysLater.getDate();
-
-//   // Combine all target dates
-//   const targetDates = [
-//     { month: todayMonth, day: todayDay },
-//     { month: oneDayMonth, day: oneDayDay },
-//     { month: twoDaysMonth, day: twoDaysDay },
-//   ];
-
-//   // Run one query per date (Firestore limitation — no OR for two fields in one query)
-//   for (const date of targetDates) {
-//     const snapshot = await db.collection('birthdays')
-//       .where('month', '==', date.month)
-//       .where('day', '==', date.day)
-//       .get();
-
-//     if (snapshot.empty) continue;
-
-//     await Promise.all(snapshot.docs.map(async doc => {
-//       const data = doc.data();
-//       const { name, month, day, fcmToken, lastNotified } = data;
-
-//       const daysLeft = daysUntilBirthday(month, day, now);
-//       let message = null;
-//       if (daysLeft === 2) message = `⏳ Only 2 days left for ${name}'s birthday!`;
-//       else if (daysLeft === 1) message = `🎈 Only 1 day left for ${name}'s birthday!`;
-//       else if (daysLeft === 0) message = `🎂 Today is ${name}'s birthday! 🎉`;
-
-//       if (message) {
-//         const todayStr = getLocalDateString(now);
-//         if (lastNotified !== todayStr) {
-//           const sent = await sendNotification(fcmToken, message);
-//           if (sent) {
-//             await doc.ref.update({ lastNotified: todayStr });
-//           } else {
-//             await doc.ref.delete(); // remove if token is bad
-//           }
-//         }
-//       }
-//     }));
-//   }
-// }
-
+}
 
 // ===== Send notification =====
 async function sendNotification(fcmToken, body) {
@@ -219,41 +151,64 @@ async function sendNotification(fcmToken, body) {
     await messaging.send({
       token: fcmToken,
       notification: {
-        title: '🎉 Birthday Reminder',
+        title: "🎉 Birthday Reminder",
         body
+      },
+      android: {
+        priority: "high",
+        notification: {
+          channelId: "birthday_reminders", // must match RN channelId
+          sound: "default",
+          priority: "max"
+        }
+      },
+      apns: {
+        headers: {
+          "apns-priority": "10" // 🔥 deliver immediately
+        },
+        payload: {
+          aps: {
+            alert: {
+              title: "🎉 Birthday Reminder",
+              body
+            },
+            sound: "default",
+            badge: 1
+          }
+        }
       }
     });
-    // console.log(`✅ Notification sent: ${body}`);
+
     return true;
   } catch (err) {
-    console.error('❌ Error sending notification', err.code || err.message);
-    if (err.code === 'messaging/registration-token-not-registered') {
-      // console.warn('⚠️ Token expired, removing from DB.');
-      return false;
+    console.error("❌ Error sending notification", err.code || err.message);
+
+    if (err.code === "messaging/registration-token-not-registered") {
+      return false; // cleanup invalid tokens
     }
     return false;
   }
 }
+
+
 
 // ===== Schedule job =====
 cron.schedule(CRON_SCHEDULE, checkBirthdays, {
   timezone: TIMEZONE
 });
 
-// Client error handling
+// ===== Error handlers =====
 app.use((req, res, next) => {
   const err = createError(404, "Route not found");
   next(err);
 });
 
-// Server error handling
 app.use((err, req, res, next) => {
   return errorResponse(res, {
     statusCode: err.status || 500,
     message: err.message || "Internal Server Error",
   });
 });
-
 
 // ===== Start server =====
 app.listen(process.env.PORT || 5000, () => {

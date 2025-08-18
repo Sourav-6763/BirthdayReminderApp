@@ -177,62 +177,62 @@ async function checkBirthdays() {
 
 
 // ===== Check holidays =====
-// async function checkHolidays() {
-//   const today = new Date();
-//   const year = today.getFullYear();
-//   const month = today.getMonth() + 1;
-//   const day = today.getDate();
-//   const todayStr = getLocalDateString(today);
+async function checkHolidays() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+  const day = today.getDate();
+  const todayStr = getLocalDateString(today);
 
-//   try {
-//     // Fetch holidays for today
-//     const response = await axios.get('https://calendarific.com/api/v2/holidays', {
-//       params: {
-//         api_key: process.env.ALL_EVENT,
-//         country: 'IN',
-//         year,
-//         month,
-//         day
-//       }
-//     });
+  try {
+    // Fetch holidays for today
+    const response = await axios.get('https://calendarific.com/api/v2/holidays', {
+      params: {
+        api_key: process.env.ALL_EVENT,
+        country: 'IN',
+        year,
+        month,
+        day
+      }
+    });
 
-//     const holidays = response.data.response.holidays;
-//     if (!holidays || holidays.length === 0) {
-//       // console.log('No holidays today.');
-//       return;
-//     }
+    const holidays = response.data.response.holidays;
+    if (!holidays || holidays.length === 0) {
+      // console.log('No holidays today.');
+      return;
+    }
 
-//     // Fetch all users
-//     const snapshot = await db.collection('birthdays').get();
+    // Fetch all users
+    const snapshot = await db.collection('birthdays').get();
 
-//     for (const doc of snapshot.docs) {
-//       const data = doc.data();
-//       const token = data.fcmToken;
-//       const lastHolidayNotified = data.lastHolidayNotified || '';
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+      const token = data.fcmToken;
+      const lastHolidayNotified = data.lastHolidayNotified || '';
 
-//       // Avoid sending duplicate notifications for the same day
-//       if (lastHolidayNotified === todayStr) continue;
+      // Avoid sending duplicate notifications for the same day
+      if (lastHolidayNotified === todayStr) continue;
 
-//       for (const holiday of holidays) {
-//         const message = `🎉 Today is ${holiday.name}! 📅 ${holiday.date.iso}`;
-//         // console.log(`Sending holiday notification to token: ${token}`);
+      for (const holiday of holidays) {
+        const message = `🎉 Today is ${holiday.name}! 📅 ${holiday.date.iso}`;
+        // console.log(`Sending holiday notification to token: ${token}`);
 
-//         const sent = await sendNotification(token, message, "Today is holiday");
-//         if (sent) {
-//           await doc.ref.update({ lastHolidayNotified: todayStr });
-//         }
-//       }
-//     }
+        const sent = await sendNotification(token, message, "Today is holiday");
+        if (sent) {
+          await doc.ref.update({ lastHolidayNotified: todayStr });
+        }
+      }
+    }
 
-//   } catch (err) {
-//     console.error("❌ Failed to fetch or send holiday notifications:", err.message);
-//   }
-// }
+  } catch (err) {
+    console.error("❌ Failed to fetch or send holiday notifications:", err.message);
+  }
+}
 
 
 
-// Schedule it at 9 AM every day
-// cron.schedule(CRON_SCHEDULE, checkHolidays, { timezone: TIMEZONE });
+
+cron.schedule(CRON_SCHEDULE, checkHolidays, { timezone: TIMEZONE });
 
 
 

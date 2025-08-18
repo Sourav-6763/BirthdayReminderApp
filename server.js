@@ -5,6 +5,9 @@ const dotenv = require('dotenv');
 const wishrouter = require('./router/sendmail');
 const { errorResponse } = require('./controller/ErrorSuccessResponse');
 const createError = require("http-errors");
+const eventRoute = require('./router/eventRoute');
+
+const axios = require('axios');
 
 dotenv.config();
 const app = express();
@@ -32,6 +35,7 @@ const TIMEZONE = process.env.TIMEZONE || 'Asia/Kolkata';
 
 // ===== Routers =====
 app.use('/sendBirthdayWish', wishrouter);
+app.use("/allEvent", eventRoute);
 
 // ===== Delete birthday =====
 app.delete('/delete-birthday/:id', async (req, res) => {
@@ -61,7 +65,6 @@ function getHealthStatus() {
 
 app.get('/check-testing', (req, res) => {
   res.status(200).json(getHealthStatus());
-
   setImmediate(() => {
     checkBirthdays()
       .then(() => console.log('🎉 Birthday check completed via health ping'))
@@ -82,7 +85,11 @@ app.post('/add-birthday', async (req, res) => {
       month: parseInt(month),
       day: parseInt(day),
       fcmToken,
-      lastNotified: null
+      lastNotified: {
+        "2days": null,
+        "1day": null,
+        "birthday": null
+      }
     });
 
     res.json({ message: 'Birthday saved!', id: ref.id });
@@ -90,6 +97,7 @@ app.post('/add-birthday', async (req, res) => {
     res.status(500).json({ error: 'Failed to save birthday' });
   }
 });
+
 
 // ===== Helpers =====
 function daysUntilBirthday(month, day, now) {
@@ -115,43 +123,128 @@ function getLocalDateString(date) {
   return date.toLocaleDateString('en-CA', { timeZone: TIMEZONE }); // YYYY-MM-DD
 }
 
-// ===== Check birthdays =====
+
+// ===== Check birthdays with separate lastNotified for each type =====
 async function checkBirthdays() {
   const now = new Date();
   const snapshot = await db.collection('birthdays').get();
 
-  await Promise.all(snapshot.docs.map(async doc => {
+  const todayStr = getLocalDateString(now);
+
+  for (const doc of snapshot.docs) {
     const data = doc.data();
-    const { name, month, day, fcmToken, lastNotified } = data;
+    const { name, month, day, fcmToken } = data;
+
+    // Ensure lastNotified object exists
+    const lastNotified = data.lastNotified || {};
 
     const daysLeft = daysUntilBirthday(month, day, now);
 
-    let message = null;
-    if (daysLeft === 2) message = `⏳ Only 2 days left for ${name}'s birthday!`;
-    else if (daysLeft === 1) message = `🎈 Only 1 day left for ${name}'s birthday!`;
-    else if (daysLeft === 0) message = `🎂 Today is ${name}'s birthday! 🎉`;
-
-    if (message) {
-      const todayStr = getLocalDateString(now);
-      if (lastNotified !== todayStr) {
-        const sent = await sendNotification(fcmToken, message);
-        if (sent) {
-          await doc.ref.update({ lastNotified: todayStr });
-        } else {
-          await doc.ref.delete(); // bad token cleanup
-        }
+    // 2 days left
+    if (daysLeft === 2 && lastNotified["2days"] !== todayStr) {
+      const message = `⏳ Only 2 days left for ${name}'s birthday!`;
+      const sent = await sendNotification(fcmToken, message, "Birthday Reminder");
+      if (sent) {
+        await doc.ref.update({
+          [`lastNotified.2days`]: todayStr
+        });
       }
     }
-  }));
+
+    // 1 day left
+    if (daysLeft === 1 && lastNotified["1day"] !== todayStr) {
+      const message = `🎈 Only 1 day left for ${name}'s birthday!`;
+      const sent = await sendNotification(fcmToken, message, "Birthday Reminder");
+      if (sent) {
+        await doc.ref.update({
+          [`lastNotified.1day`]: todayStr
+        });
+      }
+    }
+
+    // Birthday
+    if (daysLeft === 0 && lastNotified["birthday"] !== todayStr) {
+      const message = `🎂 Today is ${name}'s birthday! 🎉`;
+      const sent = await sendNotification(fcmToken, message, "Birthday Reminder");
+      if (sent) {
+        await doc.ref.update({
+          [`lastNotified.birthday`]: todayStr
+        });
+      }
+    }
+  }
 }
 
+
+// ===== Check holidays =====
+// async function checkHolidays() {
+//   const today = new Date();
+//   const year = today.getFullYear();
+//   const month = today.getMonth() + 1;
+//   const day = today.getDate();
+//   const todayStr = getLocalDateString(today);
+
+//   try {
+//     // Fetch holidays for today
+//     const response = await axios.get('https://calendarific.com/api/v2/holidays', {
+//       params: {
+//         api_key: process.env.ALL_EVENT,
+//         country: 'IN',
+//         year,
+//         month,
+//         day
+//       }
+//     });
+
+//     const holidays = response.data.response.holidays;
+//     if (!holidays || holidays.length === 0) {
+//       // console.log('No holidays today.');
+//       return;
+//     }
+
+//     // Fetch all users
+//     const snapshot = await db.collection('birthdays').get();
+
+//     for (const doc of snapshot.docs) {
+//       const data = doc.data();
+//       const token = data.fcmToken;
+//       const lastHolidayNotified = data.lastHolidayNotified || '';
+
+//       // Avoid sending duplicate notifications for the same day
+//       if (lastHolidayNotified === todayStr) continue;
+
+//       for (const holiday of holidays) {
+//         const message = `🎉 Today is ${holiday.name}! 📅 ${holiday.date.iso}`;
+//         // console.log(`Sending holiday notification to token: ${token}`);
+
+//         const sent = await sendNotification(token, message, "Today is holiday");
+//         if (sent) {
+//           await doc.ref.update({ lastHolidayNotified: todayStr });
+//         }
+//       }
+//     }
+
+//   } catch (err) {
+//     console.error("❌ Failed to fetch or send holiday notifications:", err.message);
+//   }
+// }
+
+
+
+// Schedule it at 9 AM every day
+// cron.schedule(CRON_SCHEDULE, checkHolidays, { timezone: TIMEZONE });
+
+
+
+
+
 // ===== Send notification =====
-async function sendNotification(fcmToken, body) {
+async function sendNotification(fcmToken, body,heading) {
   try {
     await messaging.send({
       token: fcmToken,
       notification: {
-        title: "🎉 Birthday Reminder",
+        title:heading,
         body
       },
       android: {

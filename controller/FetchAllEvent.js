@@ -3,21 +3,21 @@ const {successResponse} = require('./ErrorSuccessResponse');
 
 const AllEvent = async (req, res, next) => {
   const {data} = req.body;
+  console.log(data);
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
   const day = today.getDate();
-
+  let params = {
+    api_key: process.env.ALL_EVENT,
+    country: 'IN',
+    year,
+  };
   try {
-    let params = {
-      api_key: process.env.ALL_EVENT,
-      country: 'IN',
-      year,
-    };
     if (data === 'Today') {
       params.month = month;
       params.day = day;
-    } else if(data==='Month'){
+    } else if (data === 'Month') {
       params.month = month;
     }
 

@@ -9,10 +9,12 @@ const eventRoute = require('./router/eventRoute');
 
 const axios = require('axios');
 
+
 dotenv.config();
 const app = express();
 app.use(express.json());
-
+const cors = require('cors');
+app.use(cors());
 // ===== Firebase Admin init from ENV =====
 if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
   console.error('❌ FIREBASE_SERVICE_ACCOUNT env variable missing!');

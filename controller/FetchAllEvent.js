@@ -2,8 +2,7 @@ const axios = require('axios');
 const {successResponse} = require('./ErrorSuccessResponse');
 
 const AllEvent = async (req, res, next) => {
-  const {data} = req.body;
-  console.log(data);
+  const { data } = req.body; 
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth() + 1;

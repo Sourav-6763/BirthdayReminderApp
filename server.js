@@ -14,6 +14,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 const cors = require('cors');
+const AiChatRoute = require('./router/aiChatRoute');
 app.use(cors());
 
 // ===== Firebase Admin init from ENV =====
@@ -39,6 +40,7 @@ const TIMEZONE = process.env.TIMEZONE || 'Asia/Kolkata';
 // ===== Routers =====
 app.use('/sendBirthdayWish', wishrouter);
 app.use("/allEvent", eventRoute);
+app.use("/AiChat", AiChatRoute);
 
 // ===== Delete birthday =====
 app.delete('/delete-birthday/:id', async (req, res) => {

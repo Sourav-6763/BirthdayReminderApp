@@ -24,10 +24,10 @@ const sendBirthdayWish = async (req, res, next) => {
         Wishing you a day filled with love, laughter, and unforgettable moments.  
         May this year bring you endless happiness and success! 💖
       </p>
-      <img src="https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif" alt="Birthday Cake" style="width: 100%; max-width: 350px; border-radius: 8px; margin: 20px auto;" />
+      <img src="https://www.bestworldevents.com/wp-content/uploads/2021/12/89.gif" alt="Birthday Cake" style="width: 100%; max-width: 350px; border-radius: 8px; margin: 20px auto;" />
       <p style="font-size: 16px; margin-top: 20px;">Enjoy every bite of cake and every smile you receive today. 🎂</p>
       <footer style="margin-top: 30px; font-size: 14px; color: #ffe;">
-        <p>From all of us at <strong>Your Company</strong> 💌</p>
+        <p>From all of us at <strong>Birthday Remainder App</strong> 💌</p>
       </footer>
     </div>
       `,

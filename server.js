@@ -244,46 +244,65 @@ cron.schedule(CRON_SCHEDULE, checkHolidays, { timezone: TIMEZONE });
 
 
 // ===== Send notification =====
-async function sendNotification(fcmToken, body,heading) {
+// async function sendNotification(fcmToken, body,heading) {
+//   try {
+//     await messaging.send({
+//       token: fcmToken,
+//       notification: {
+//         title:heading,
+//         body
+//       },
+//       android: {
+//         priority: "high",
+//         notification: {
+//           channelId: "birthday_reminders", // must match RN channelId
+//           sound: "default",
+//           priority: "max"
+//         }
+//       },
+//       apns: {
+//         headers: {
+//           "apns-priority": "10" // 🔥 deliver immediately
+//         },
+//         payload: {
+//           aps: {
+//             alert: {
+//               title: "🎉 Birthday Reminder",
+//               body
+//             },
+//             sound: "default",
+//             badge: 1
+//           }
+//         }
+//       }
+//     });
+
+//     return true;
+//   } catch (err) {
+//     console.error("❌ Error sending notification", err.code || err.message);
+
+//     if (err.code === "messaging/registration-token-not-registered") {
+//       return false; // cleanup invalid tokens
+//     }
+//     return false;
+//   }
+// }
+async function sendNotification(fcmToken, body, heading) {
   try {
     await messaging.send({
       token: fcmToken,
-      notification: {
-        title:heading,
-        body
-      },
+      notification: { title: heading, body }, // for OS
+      data: { type: "birthday", body, heading }, // for RN app
       android: {
         priority: "high",
-        notification: {
-          channelId: "birthday_reminders", // must match RN channelId
-          sound: "default",
-          priority: "max"
-        }
+        notification: { channelId: "birthday_reminders", sound: "default", priority: "max" }
       },
-      apns: {
-        headers: {
-          "apns-priority": "10" // 🔥 deliver immediately
-        },
-        payload: {
-          aps: {
-            alert: {
-              title: "🎉 Birthday Reminder",
-              body
-            },
-            sound: "default",
-            badge: 1
-          }
-        }
-      }
+      apns: { headers: { "apns-priority": "10" }, payload: { aps: { alert: { title: heading, body }, sound: "default", badge: 1 } } }
     });
-
     return true;
   } catch (err) {
     console.error("❌ Error sending notification", err.code || err.message);
-
-    if (err.code === "messaging/registration-token-not-registered") {
-      return false; // cleanup invalid tokens
-    }
+    if (err.code === "messaging/registration-token-not-registered") return false;
     return false;
   }
 }

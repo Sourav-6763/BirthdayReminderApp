@@ -3,12 +3,11 @@ const admin = require('firebase-admin');
 const cron = require('node-cron');
 const dotenv = require('dotenv');
 const wishrouter = require('./router/sendmail');
-const { errorResponse } = require('./controller/ErrorSuccessResponse');
-const createError = require("http-errors");
+const {errorResponse} = require('./controller/ErrorSuccessResponse');
+const createError = require('http-errors');
 const eventRoute = require('./router/eventRoute');
 
 const axios = require('axios');
-
 
 dotenv.config();
 const app = express();
@@ -26,7 +25,7 @@ if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.cert(serviceAccount),
 });
 
 const db = admin.firestore();
@@ -39,32 +38,32 @@ const TIMEZONE = process.env.TIMEZONE || 'Asia/Kolkata';
 
 // ===== Routers =====
 app.use('/sendBirthdayWish', wishrouter);
-app.use("/allEvent", eventRoute);
-app.use("/AiChat", AiChatRoute);
+app.use('/allEvent', eventRoute);
+app.use('/AiChat', AiChatRoute);
 
 // ===== Delete birthday =====
 app.delete('/delete-birthday/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
     const docRef = db.collection('birthdays').doc(id);
     const docSnap = await docRef.get();
 
     if (!docSnap.exists) {
-      return res.status(404).json({ error: 'Birthday not found' });
+      return res.status(404).json({error: 'Birthday not found'});
     }
 
     await docRef.delete();
-    res.json({ message: 'Birthday deleted successfully' });
+    res.json({message: 'Birthday deleted successfully'});
   } catch (err) {
-    res.status(500).json({ error: 'Failed to delete birthday' });
+    res.status(500).json({error: 'Failed to delete birthday'});
   }
 });
 
 // ===== Health check =====
 function getHealthStatus() {
   return {
-    status: "ok",
-    uptime: process.uptime()
+    status: 'ok',
+    uptime: process.uptime(),
   };
 }
 
@@ -73,16 +72,19 @@ app.get('/check-testing', (req, res) => {
   setImmediate(() => {
     checkBirthdays()
       .then(() => console.log('🎉 Birthday check completed via health ping'))
-      .catch(err => console.error('❌ Birthday check failed via health ping', err));
+      .catch(err =>
+        console.error('❌ Birthday check failed via health ping', err),
+      );
   });
 });
 
 // ===== Add birthday =====
 app.post('/add-birthday', async (req, res) => {
+  console.log(req.body);
   try {
-    const { name, month, day, fcmToken } = req.body;
+    const {name, month, day, fcmToken,timezone} = req.body;
     if (!name || !month || !day || !fcmToken) {
-      return res.status(400).json({ error: 'Missing fields' });
+      return res.status(400).json({error: 'Missing fields'});
     }
 
     const ref = await db.collection('birthdays').add({
@@ -90,27 +92,32 @@ app.post('/add-birthday', async (req, res) => {
       month: parseInt(month),
       day: parseInt(day),
       fcmToken,
+      timezone,
       lastNotified: {
-        "2days": null,
-        "1day": null,
-        "birthday": null
-      }
+        '2days': null,
+        '1day': null,
+        birthday: null,
+      },
     });
 
-    res.json({ message: 'Birthday saved!', id: ref.id });
+    res.json({message: 'Birthday saved!', id: ref.id});
   } catch (err) {
-    res.status(500).json({ error: 'Failed to save birthday' });
+    res.status(500).json({error: 'Failed to save birthday'});
   }
 });
 
-
 // ===== Helpers =====
-function daysUntilBirthday(month, day, now) {
+function daysUntilBirthday(month, day, now,timezone) {
   const thisYear = now.getFullYear();
 
   // Convert to local timezone date (strip time part)
   const today = new Date(
-    new Date(now.toLocaleString("en-US", { timeZone: TIMEZONE })).setHours(0, 0, 0, 0)
+    new Date(now.toLocaleString('en-US', {timeZone: timezone})).setHours(
+      0,
+      0,
+      0,
+      0,
+    ),
   );
 
   let nextBirthday = new Date(thisYear, month - 1, day);
@@ -124,62 +131,73 @@ function daysUntilBirthday(month, day, now) {
   return Math.round(diffTime / (1000 * 60 * 60 * 24)); // ✅ use round instead of floor
 }
 
-function getLocalDateString(date) {
-  return date.toLocaleDateString('en-CA', { timeZone: TIMEZONE }); // YYYY-MM-DD
+function getLocalDateString(date,timezone) {
+  return date.toLocaleDateString('en-CA', {timeZone: timezone}); // YYYY-MM-DD
 }
-
 
 // ===== Check birthdays with separate lastNotified for each type =====
 async function checkBirthdays() {
   const now = new Date();
   const snapshot = await db.collection('birthdays').get();
 
-  const todayStr = getLocalDateString(now);
+    
 
   for (const doc of snapshot.docs) {
     const data = doc.data();
-    const { name, month, day, fcmToken } = data;
+    const {name, month, day, fcmToken,timezone = 'Asia/Kolkata' } = data;
 
-    // Ensure lastNotified object exists
+      const todayStr = getLocalDateString(now, timezone);
+   
+
+    const daysLeft = daysUntilBirthday(month, day, now,timezone);
+ // Ensure lastNotified object exists
     const lastNotified = data.lastNotified || {};
-
-    const daysLeft = daysUntilBirthday(month, day, now);
-
     // 2 days left
-    if (daysLeft === 2 && lastNotified["2days"] !== todayStr) {
+    if (daysLeft === 2 && lastNotified['2days'] !== todayStr) {
       const message = `⏳ Only 2 days left for ${name}'s birthday!`;
-      const sent = await sendNotification(fcmToken, message, "Birthday Reminder");
+      const sent = await sendNotification(
+        fcmToken,
+        message,
+        'Birthday Reminder',
+      );
       if (sent) {
         await doc.ref.update({
-          [`lastNotified.2days`]: todayStr
+          [`lastNotified.2days`]: todayStr,
         });
       }
     }
 
     // 1 day left
-    if (daysLeft === 1 && lastNotified["1day"] !== todayStr) {
+    if (daysLeft === 1 && lastNotified['1day'] !== todayStr) {
       const message = `🎈 Only 1 day left for ${name}'s birthday!`;
-      const sent = await sendNotification(fcmToken, message, "Birthday Reminder");
+      const sent = await sendNotification(
+        fcmToken,
+        message,
+        'Birthday Reminder',
+      );
       if (sent) {
         await doc.ref.update({
-          [`lastNotified.1day`]: todayStr
+          [`lastNotified.1day`]: todayStr,
         });
       }
     }
 
     // Birthday
-    if (daysLeft === 0 && lastNotified["birthday"] !== todayStr) {
+    if (daysLeft === 0 && lastNotified['birthday'] !== todayStr) {
       const message = `🎂 Today is ${name}'s birthday! 🎉`;
-      const sent = await sendNotification(fcmToken, message, "Birthday Reminder");
+      const sent = await sendNotification(
+        fcmToken,
+        message,
+        'Birthday Reminder',
+      );
       if (sent) {
         await doc.ref.update({
-          [`lastNotified.birthday`]: todayStr
+          [`lastNotified.birthday`]: todayStr,
         });
       }
     }
   }
 }
-
 
 // ===== Check holidays =====
 async function checkHolidays() {
@@ -191,15 +209,18 @@ async function checkHolidays() {
 
   try {
     // Fetch holidays for today
-    const response = await axios.get('https://calendarific.com/api/v2/holidays', {
-      params: {
-        api_key: process.env.ALL_EVENT,
-        country: 'IN',
-        year,
-        month,
-        day
-      }
-    });
+    const response = await axios.get(
+      'https://calendarific.com/api/v2/holidays',
+      {
+        params: {
+          api_key: process.env.ALL_EVENT,
+          country: 'IN',
+          year,
+          month,
+          day,
+        },
+      },
+    );
 
     const holidays = response.data.response.holidays;
     if (!holidays || holidays.length === 0) {
@@ -222,26 +243,21 @@ async function checkHolidays() {
         const message = `🎉 Today is ${holiday.name}! 📅 ${holiday.date.iso}`;
         // console.log(`Sending holiday notification to token: ${token}`);
 
-        const sent = await sendNotification(token, message, "Today is holiday");
+        const sent = await sendNotification(token, message, 'Today is holiday');
         if (sent) {
-          await doc.ref.update({ lastHolidayNotified: todayStr });
+          await doc.ref.update({lastHolidayNotified: todayStr});
         }
       }
     }
-
   } catch (err) {
-    console.error("❌ Failed to fetch or send holiday notifications:", err.message);
+    console.error(
+      '❌ Failed to fetch or send holiday notifications:',
+      err.message,
+    );
   }
 }
 
-
-
-
-cron.schedule(CRON_SCHEDULE, checkHolidays, { timezone: TIMEZONE });
-
-
-
-
+cron.schedule(CRON_SCHEDULE, checkHolidays, {timezone: TIMEZONE});
 
 // ===== Send notification =====
 // async function sendNotification(fcmToken, body,heading) {
@@ -291,39 +307,47 @@ async function sendNotification(fcmToken, body, heading) {
   try {
     await messaging.send({
       token: fcmToken,
-      notification: { title: heading, body }, // for OS
-      data: { type: "birthday", body, heading }, // for RN app
+      notification: {title: heading, body}, // for OS
+      data: {type: 'birthday', body, heading}, // for RN app
       android: {
-        priority: "high",
-        notification: { channelId: "birthday_reminders", sound: "default", priority: "max" }
+        priority: 'high',
+        notification: {
+          channelId: 'birthday_reminders',
+          sound: 'default',
+          priority: 'max',
+        },
       },
-      apns: { headers: { "apns-priority": "10" }, payload: { aps: { alert: { title: heading, body }, sound: "default", badge: 1 } } }
+      apns: {
+        headers: {'apns-priority': '10'},
+        payload: {
+          aps: {alert: {title: heading, body}, sound: 'default', badge: 1},
+        },
+      },
     });
     return true;
   } catch (err) {
-    console.error("❌ Error sending notification", err.code || err.message);
-    if (err.code === "messaging/registration-token-not-registered") return false;
+    console.error('❌ Error sending notification', err.code || err.message);
+    if (err.code === 'messaging/registration-token-not-registered')
+      return false;
     return false;
   }
 }
 
-
-
 // ===== Schedule job =====
 cron.schedule(CRON_SCHEDULE, checkBirthdays, {
-  timezone: TIMEZONE
+  timezone: TIMEZONE,
 });
 
 // ===== Error handlers =====
 app.use((req, res, next) => {
-  const err = createError(404, "Route not found");
+  const err = createError(404, 'Route not found');
   next(err);
 });
 
 app.use((err, req, res, next) => {
   return errorResponse(res, {
     statusCode: err.status || 500,
-    message: err.message || "Internal Server Error",
+    message: err.message || 'Internal Server Error',
   });
 });
 

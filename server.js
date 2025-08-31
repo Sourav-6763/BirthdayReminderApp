@@ -80,7 +80,6 @@ app.get('/check-testing', (req, res) => {
 
 // ===== Add birthday =====
 app.post('/add-birthday', async (req, res) => {
-  console.log(req.body);
   try {
     const {name, month, day, fcmToken,timezone} = req.body;
     if (!name || !month || !day || !fcmToken) {

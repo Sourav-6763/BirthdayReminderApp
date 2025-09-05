@@ -2,14 +2,14 @@ const axios = require('axios');
 const {successResponse} = require('./ErrorSuccessResponse');
 
 const AllEvent = async (req, res, next) => {
-  const { data } = req.body; 
+  const { data,country } = req.body; 
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
   const day = today.getDate();
   let params = {
     api_key: process.env.ALL_EVENT,
-    country: 'IN',
+    country: country,
     year,
   };
   try {

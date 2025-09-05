@@ -60,6 +60,24 @@ app.delete('/delete-birthday/:id', async (req, res) => {
 });
 
 // ===== Health check =====
+// function getHealthStatus() {
+//   return {
+//     status: 'ok',
+//     uptime: process.uptime(),
+//   };
+// }
+
+// app.get('/check-testing', (req, res) => {
+//   res.status(200).json(getHealthStatus());
+//   setImmediate(() => {
+//     checkBirthdays()
+//       .then(() => console.log('🎉 Birthday check completed via health ping'))
+//       .catch(err =>
+//         console.error('❌ Birthday check failed via health ping', err),
+//       );
+//   });
+// });
+
 function getHealthStatus() {
   return {
     status: 'ok',
@@ -69,20 +87,15 @@ function getHealthStatus() {
 
 app.get('/check-testing', (req, res) => {
   res.status(200).json(getHealthStatus());
-  setImmediate(() => {
-    checkBirthdays()
-      .then(() => console.log('🎉 Birthday check completed via health ping'))
-      .catch(err =>
-        console.error('❌ Birthday check failed via health ping', err),
-      );
-  });
 });
+
+
+
 
 // ===== Add birthday =====
 app.post('/add-birthday', async (req, res) => {
-  console.log(req.body);
   try {
-    const {name, month, day, fcmToken,timezone} = req.body;
+    const {name, month, day, fcmToken,timezone,country} = req.body;
     if (!name || !month || !day || !fcmToken) {
       return res.status(400).json({error: 'Missing fields'});
     }
@@ -93,6 +106,7 @@ app.post('/add-birthday', async (req, res) => {
       day: parseInt(day),
       fcmToken,
       timezone,
+      country,
       lastNotified: {
         '2days': null,
         '1day': null,
@@ -207,55 +221,49 @@ async function checkHolidays() {
   const day = today.getDate();
   const todayStr = getLocalDateString(today);
 
-  try {
-    // Fetch holidays for today
-    const response = await axios.get(
-      'https://calendarific.com/api/v2/holidays',
-      {
-        params: {
-          api_key: process.env.ALL_EVENT,
-          country: 'IN',
-          year,
-          month,
-          day,
+  const snapshot = await db.collection('birthdays').get();
+
+  for (const doc of snapshot.docs) {
+    const data = doc.data();
+    const token = data.fcmToken;
+    const userCountry = data.country || 'IN'; 
+    const lastHolidayNotified = data.lastHolidayNotified || '';
+
+    if (lastHolidayNotified === todayStr) continue;
+
+    try {
+      const response = await axios.get(
+        'https://calendarific.com/api/v2/holidays',
+        {
+          params: {
+            api_key: process.env.ALL_EVENT,
+            country: userCountry, 
+            year,
+            month,
+            day,
+          },
         },
-      },
-    );
+      );
 
-    const holidays = response.data.response.holidays;
-    if (!holidays || holidays.length === 0) {
-      // console.log('No holidays today.');
-      return;
-    }
-
-    // Fetch all users
-    const snapshot = await db.collection('birthdays').get();
-
-    for (const doc of snapshot.docs) {
-      const data = doc.data();
-      const token = data.fcmToken;
-      const lastHolidayNotified = data.lastHolidayNotified || '';
-
-      // Avoid sending duplicate notifications for the same day
-      if (lastHolidayNotified === todayStr) continue;
+      const holidays = response.data.response.holidays;
+      if (!holidays || holidays.length === 0) continue;
 
       for (const holiday of holidays) {
         const message = `🎉 Today is ${holiday.name}! 📅 ${holiday.date.iso}`;
-        // console.log(`Sending holiday notification to token: ${token}`);
-
         const sent = await sendNotification(token, message, 'Today is holiday');
         if (sent) {
-          await doc.ref.update({lastHolidayNotified: todayStr});
+          await doc.ref.update({ lastHolidayNotified: todayStr });
         }
       }
+    } catch (err) {
+      console.error(
+        `❌ Failed to fetch/send holidays for ${userCountry}:`,
+        err.message,
+      );
     }
-  } catch (err) {
-    console.error(
-      '❌ Failed to fetch or send holiday notifications:',
-      err.message,
-    );
   }
 }
+
 
 cron.schedule(CRON_SCHEDULE, checkHolidays, {timezone: TIMEZONE});
 

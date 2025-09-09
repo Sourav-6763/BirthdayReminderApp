@@ -59,7 +59,7 @@
 //   }
 // });
 
-// ===== Health check =====
+// // ===== Health check =====
 
 // function getHealthStatus() {
 //   return {
@@ -72,7 +72,23 @@
 //   res.status(200).json(getHealthStatus());
 // });
 
+// function getHealthStatus() {
+//   return {
+//     status: 'ok',
+//     uptime: process.uptime(),
+//   };
+// }
 
+// app.get('/check-testing-birthday', (req, res) => {
+//   res.status(200).json(getHealthStatus());
+//   setImmediate(() => {
+//     checkBirthdays()
+//       .then(() => console.log('🎉 Birthday check completed via health ping'))
+//       .catch(err =>
+//         console.error('❌ Birthday check failed via health ping', err),
+//       );
+//   });
+// });
 
 
 // // ===== Add birthday =====

@@ -660,7 +660,7 @@ async function sendNotification(fcmToken, body, heading, uniqueId = Date.now().t
           aps: {alert: {title: heading, body}, sound: 'default', badge: 1},
         },
       },
-      collapseKey: uniqueId, 
+      // collapseKey: uniqueId, 
     });
     return true;
   } catch (err) {

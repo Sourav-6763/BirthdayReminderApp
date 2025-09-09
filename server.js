@@ -634,16 +634,16 @@ async function checkHolidays() {
 cron.schedule(CRON_SCHEDULE, checkHolidays, {timezone: TIMEZONE});
 
 // ===== Send notification =====
-async function sendNotification(fcmToken, body, heading, uniqueId = Date.now().toString()) { // 🟢 CHANGE: extra param
+async function sendNotification(fcmToken, body, heading, uniqueId = `${Date.now()}-${Math.random()}`) {
   try {
     await messaging.send({
       token: fcmToken,
-      notification: {title: heading, body},
+      notification: { title: heading, body },
       data: {
         type: 'birthday',
         body,
         heading,
-        id: uniqueId, // 🟢 CHANGE
+        id: uniqueId, // unique per notification
       },
       android: {
         priority: 'high',
@@ -651,20 +651,22 @@ async function sendNotification(fcmToken, body, heading, uniqueId = Date.now().t
           channelId: 'birthday_reminders',
           sound: 'default',
           priority: 'max',
-          tag: uniqueId, // 🟢 CHANGE
+          tag: uniqueId, // ensures each notification is treated separately
         },
       },
       apns: {
-        headers: {'apns-priority': '10'},
+        headers: { 'apns-priority': '10' },
         payload: {
-          aps: {alert: {title: heading, body}, sound: 'default', badge: 1},
+          aps: { alert: { title: heading, body }, sound: 'default', badge: 1 },
         },
       },
-      // collapseKey: uniqueId, 
+      collapseKey: uniqueId, // important: prevents collapsing offline messages
     });
+
     return true;
   } catch (err) {
     console.error('❌ Error sending notification', err.code || err.message);
+
     if (err.code === 'messaging/registration-token-not-registered') {
       if (fcmToken) {
         const snap = await db.collection('birthdays')
@@ -682,9 +684,11 @@ async function sendNotification(fcmToken, body, heading, uniqueId = Date.now().t
         }
       }
     }
+
     return false;
   }
 }
+
 
 // ===== Schedule job =====
 cron.schedule(CRON_SCHEDULE, checkBirthdays, {timezone: TIMEZONE});

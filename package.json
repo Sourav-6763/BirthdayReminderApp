@@ -12,6 +12,7 @@
     "dotenv": "^16.6.1",
     "express": "^4.21.2",
     "firebase-admin": "^11.10.1",
+    "holidayapi": "^6.0.1",
     "http-errors": "^2.0.0",
     "node-cron": "^3.0.2",
     "nodemailer": "^7.0.5"

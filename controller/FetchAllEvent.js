@@ -1,8 +1,13 @@
 const axios = require('axios');
+const express = require('express'); 
+const app = express();
 const {successResponse} = require('./ErrorSuccessResponse');
 
+app.use(express.json()); 
+
 const AllEvent = async (req, res, next) => {
-  const { data,country } = req.body; 
+  const {data, country} = req.body;
+  console.log(req.body);
   const today = new Date();
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
@@ -19,6 +24,10 @@ const AllEvent = async (req, res, next) => {
     } else if (data === 'Month') {
       params.month = month;
     }
+
+
+     
+
 
     const response = await axios.get(
       'https://calendarific.com/api/v2/holidays',

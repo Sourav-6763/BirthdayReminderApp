@@ -3,6 +3,7 @@ const {successResponse, errorResponse} = require('./ErrorSuccessResponse');
 const ai = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY});
 
 const quickAns = async (req, res, next) => {
+  
   const text = req.body.q;
   try {
     if (!text) {

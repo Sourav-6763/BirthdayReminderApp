@@ -2,7 +2,6 @@ const emailWithNodeMailer = require('../helper/nodeMailer');
 const {successResponse, errorResponse} = require('./ErrorSuccessResponse');
 
 const sendBirthdayWish = async (req, res, next) => {
-  console.log(req.body);
   const {email, name} = req.body;
   if (!email || !name) {
     return errorResponse(res, {

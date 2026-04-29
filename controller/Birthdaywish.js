@@ -1,12 +1,13 @@
-const emailWithNodeMailer = require('../helper/nodeMailer');
-const {successResponse, errorResponse} = require('./ErrorSuccessResponse');
+import emailWithNodeMailer from "../helper/nodeMailer.js";
+import { successResponse, errorResponse } from "./ErrorSuccessResponse.js";
 
-const sendBirthdayWish = async (req, res, next) => {
-  const {email, name} = req.body;
+export const sendBirthdayWish = async (req, res, next) => {
+  const { email, name } = req.body;
+
   if (!email || !name) {
     return errorResponse(res, {
       statusCode: 400,
-      message: 'Email and name are required',
+      message: "Email and name are required",
       payload: {},
     });
   }
@@ -14,11 +15,11 @@ const sendBirthdayWish = async (req, res, next) => {
   try {
     const emailData = {
       email,
-      subject: `🎉 Happy Birthday, ${name || 'Friend'}! 🎂`,
+      subject: `🎉 Happy Birthday, ${name || "Friend"}! 🎂`,
       html: `
     <div style="font-family: Arial, sans-serif; max-width: 650px; margin: auto; padding: 20px; background: linear-gradient(135deg, #f9d423, #ff4e50); color: #fff; border-radius: 10px; text-align: center;">
       <h1 style="font-size: 36px; margin-bottom: 10px;">🎉 Happy Birthday ${
-        name || ''
+        name || ""
       }! 🎉</h1>
       <p style="font-size: 18px; margin-bottom: 20px;">
         Wishing you a day filled with love, laughter, and unforgettable moments.  
@@ -37,12 +38,10 @@ const sendBirthdayWish = async (req, res, next) => {
 
     return successResponse(res, {
       statusCode: 200,
-      message: 'Birthday wish sent successfully 🎉',
+      message: "Birthday wish sent successfully 🎉",
       payload: {},
     });
   } catch (error) {
     next(error);
   }
 };
-
-module.exports = {sendBirthdayWish};

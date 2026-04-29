@@ -1,9 +1,8 @@
-const express = require("express");
-const { AllEvent } = require("../controller/FetchAllEvent");
+import express from "express";
+import { AllEvent } from "../controller/FetchAllEvent.js";
 
 const eventRoute = express.Router();
 
+eventRoute.post("/fetchEvent", AllEvent);
 
-eventRoute.post("/fetchEvent",AllEvent);
-module.exports = eventRoute;
-
+export default eventRoute;

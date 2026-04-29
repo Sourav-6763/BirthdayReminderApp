@@ -1,10 +1,11 @@
-const express = require("express");
-const { quickAns } = require("../controller/aiChat");
+import express from "express";
+import { quickAns } from "../controller/aiChat.js";
 
 const AiChatRoute = express.Router();
 
 
 AiChatRoute.post("/reply",quickAns);
-module.exports = AiChatRoute;
+
+export default AiChatRoute;
 
 

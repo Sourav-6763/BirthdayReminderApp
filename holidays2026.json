@@ -1,0 +1,202 @@
+[
+  {
+    "date": "2026-01-01",
+    "events": [
+      {
+        "name": "New Year's Day",
+        "type": "global",
+        "description": "Celebration of the first day of the year."
+      }
+    ]
+  },
+  {
+    "date": "2026-01-14",
+    "events": [
+      {
+        "name": "Makar Sankranti",
+        "type": "hindu",
+        "description": "Harvest festival marking sun's transition."
+      }
+    ]
+  },
+  {
+    "date": "2026-01-26",
+    "events": [
+      {
+        "name": "Republic Day",
+        "type": "national",
+        "description": "India adopted its Constitution in 1950."
+      }
+    ]
+  },
+  {
+    "date": "2026-02-15",
+    "events": [
+      {
+        "name": "Maha Shivratri",
+        "type": "hindu",
+        "description": "Dedicated to Lord Shiva worship."
+      }
+    ]
+  },
+  {
+    "date": "2026-03-04",
+    "events": [
+      {
+        "name": "Holika Dahan",
+        "type": "hindu",
+        "description": "Bonfire ritual before Holi celebration."
+      }
+    ]
+  },
+  {
+    "date": "2026-03-05",
+    "events": [
+      {
+        "name": "Holi",
+        "type": "hindu",
+        "description": "Festival of colors and joy."
+      }
+    ]
+  },
+  {
+    "date": "2026-03-22",
+    "events": [
+      {
+        "name": "Gudi Padwa / Ugadi",
+        "type": "hindu",
+        "description": "Hindu New Year celebration in many states."
+      }
+    ]
+  },
+  {
+    "date": "2026-04-02",
+    "events": [
+      {
+        "name": "Ram Navami",
+        "type": "hindu",
+        "description": "Birth of Lord Rama celebration."
+      }
+    ]
+  },
+  {
+    "date": "2026-04-14",
+    "events": [
+      {
+        "name": "Ambedkar Jayanti",
+        "type": "national",
+        "description": "Birth anniversary of Dr. B.R. Ambedkar."
+      }
+    ]
+  },
+  {
+    "date": "2026-05-01",
+    "events": [
+      {
+        "name": "Labour Day",
+        "type": "national",
+        "description": "Celebration of workers and labor rights."
+      }
+    ]
+  },
+  {
+    "date": "2026-07-21",
+    "events": [
+      {
+        "name": "Guru Purnima",
+        "type": "hindu",
+        "description": "Honoring spiritual and academic teachers."
+      }
+    ]
+  },
+  {
+    "date": "2026-08-15",
+    "events": [
+      {
+        "name": "Independence Day",
+        "type": "national",
+        "description": "India gained independence in 1947."
+      }
+    ]
+  },
+  {
+    "date": "2026-08-28",
+    "events": [
+      {
+        "name": "Raksha Bandhan",
+        "type": "hindu",
+        "description": "Festival of brother-sister bond."
+      }
+    ]
+  },
+  {
+    "date": "2026-09-05",
+    "events": [
+      {
+        "name": "Krishna Janmashtami",
+        "type": "hindu",
+        "description": "Birth of Lord Krishna celebration."
+      }
+    ]
+  },
+  {
+    "date": "2026-10-02",
+    "events": [
+      {
+        "name": "Gandhi Jayanti",
+        "type": "national",
+        "description": "Birth anniversary of Mahatma Gandhi."
+      }
+    ]
+  },
+  {
+    "date": "2026-10-20",
+    "events": [
+      {
+        "name": "Dussehra",
+        "type": "hindu",
+        "description": "Victory of good over evil."
+      }
+    ]
+  },
+  {
+    "date": "2026-11-08",
+    "events": [
+      {
+        "name": "Diwali",
+        "type": "hindu",
+        "description": "Festival of lights and prosperity."
+      }
+    ]
+  },
+  {
+    "date": "2026-11-09",
+    "events": [
+      {
+        "name": "Govardhan Puja",
+        "type": "hindu",
+        "description": "Worship of Lord Krishna lifting Govardhan hill."
+      }
+    ]
+  },
+  {
+    "date": "2026-11-10",
+    "events": [
+      {
+        "name": "Bhai Dooj",
+        "type": "hindu",
+        "description": "Celebration of brother-sister bond."
+      }
+    ]
+  },
+  {
+    "date": "2026-12-25",
+    "events": [
+      {
+        "name": "Christmas",
+        "type": "global",
+        "description": "Celebration of birth of Jesus Christ."
+      }
+    ]
+  }
+]

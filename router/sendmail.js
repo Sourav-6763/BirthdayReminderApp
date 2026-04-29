@@ -1,9 +1,8 @@
-const express = require("express");
-const { sendBirthdayWish } = require("../controller/Birthdaywish");
+import express from "express";
+import { sendBirthdayWish } from "../controller/Birthdaywish.js";
 
 const wishrouter = express.Router();
 
-
 wishrouter.post("/sendmail", sendBirthdayWish);
-module.exports = wishrouter;
 
+export default wishrouter;

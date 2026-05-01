@@ -86,7 +86,7 @@ app.get('/check-testing', (req, res) => {
 //   };
 // }
 
-app.get('/check-testing-birthday', (req, res) => {
+app.get('/check-birthday', (req, res) => {
   res.status(200).json(getHealthStatus());
   setImmediate(() => {
     checkBirthdays()
@@ -96,6 +96,14 @@ app.get('/check-testing-birthday', (req, res) => {
       );
   });
 });
+
+app.get('/check-holidays', (req, res) => {
+  res.status(200).json(getHealthStatus());
+  setImmediate(() => {
+    checkHolidays();
+  });
+});
+
 app.post('/save-user', async (req, res) => {
   try {
     const {fcmToken, userId, country, timezone} = req.body;
@@ -151,34 +159,6 @@ app.post('/add-birthday', async (req, res) => {
   }
 });
 
-// ===== Helpers =====
-function daysUntilBirthday(month, day, now, timezone) {
-  const thisYear = now.getFullYear();
-
-  // Convert to local timezone date (strip time part)
-  const today = new Date(
-    new Date(now.toLocaleString('en-US', {timeZone: timezone})).setHours(
-      0,
-      0,
-      0,
-      0,
-    ),
-  );
-
-  let nextBirthday = new Date(thisYear, month - 1, day);
-
-  // If birthday already passed this year → set to next year
-  if (nextBirthday < today) {
-    nextBirthday.setFullYear(thisYear + 1);
-  }
-
-  const diffTime = nextBirthday - today;
-  return Math.round(diffTime / (1000 * 60 * 60 * 24)); // ✅ use round instead of floor
-}
-
-// function getLocalDateString(date, timezone) {
-//   return date.toLocaleDateString('en-CA', {timeZone: timezone}); // YYYY-MM-DD
-// }
 function check1day2day0day(value) {
   const now = new Date();
   now.setDate(now.getDate() + value);
@@ -187,12 +167,9 @@ function check1day2day0day(value) {
     month: now.getMonth() + 1,
   };
 }
-checkBirthdays();
+// checkBirthdays();
 // ===== Check birthdays with separate lastNotified for each type =====
 async function checkBirthdays() {
-  // const now = new Date();
-  // const day = now.getDate();
-  // const month = now.getMonth() + 1;
   const today = check1day2day0day(0);
   const oneDay = check1day2day0day(1);
   const twoDays = check1day2day0day(2);
@@ -283,130 +260,26 @@ async function checkBirthdays() {
   }
 }
 
-// ===== Check holidays =====
-// async function checkHolidays() {
-//   const today = new Date();
-//   const year = today.getFullYear();
-//   const month = today.getMonth() + 1;
-//   const day = today.getDate();
-//   const todayStr = getLocalDateString(today);
-
-//   const snapshot = await db.collection('birthdays').get();
-
-//   for (const doc of snapshot.docs) {
-//     const data = doc.data();
-//     const token = data.fcmToken;
-//     const userCountry = data.country || 'IN';
-//     const lastHolidayNotified = data.lastHolidayNotified || '';
-
-//     if (lastHolidayNotified === todayStr) continue;
-
-//     try {
-//       const response = await axios.get(
-//         'https://calendarific.com/api/v2/holidays',
-//         {
-//           params: {
-//             api_key: process.env.ALL_EVENT,
-//             country: userCountry,
-//             year,
-//             month,
-//             day,
-//           },
-//         },
-//       );
-
-//       const holidays = response.data.response.holidays;
-//       if (!holidays || holidays.length === 0) continue;
-
-//       for (const holiday of holidays) {
-//         const message = `🎉 Today is ${holiday.name}! 📅 ${holiday.date.iso}`;
-//         const sent = await sendNotification(token, message, 'Today is holiday');
-//         if (sent) {
-//           await doc.ref.update({ lastHolidayNotified: todayStr });
-//         }
-//       }
-//     } catch (err) {
-//       console.error(
-//         `❌ Failed to fetch/send holidays for ${userCountry}:`,
-//         err.message,
-//       );
-//     }
-//   }
-// }
-
-// async function checkHolidays() {
-//   const today = new Date().toISOString().split('T')[0];
-//   const snapshort = await db.collection('Holidays').doc('2026-01-01').get();
-//   const holidays = snapshort.data().events;
-//   //  if (!holidays || holidays.length === 0) continue;
-//   for (const data of holidays){
-//     // const message = `🎉 Today is ${data.name}! 📅 ${today}`;
-//     // const sent = await sendNotification(token, message, 'Today is holiday');
-//     console.log(data);
-//   }
-// }
-// checkHolidays();
-
-cron.schedule(CRON_SCHEDULE, checkHolidays, {timezone: TIMEZONE});
-
-// ===== Send notification =====
-// async function sendNotification(fcmToken, body,heading) {
-//   try {
-//     await messaging.send({
-//       token: fcmToken,
-//       notification: {
-//         title:heading,
-//         body
-//       },
-//       android: {
-//         priority: "high",
-//         notification: {
-//           channelId: "birthday_reminders", // must match RN channelId
-//           sound: "default",
-//           priority: "max"
-//         }
-//       },
-//       apns: {
-//         headers: {
-//           "apns-priority": "10" // 🔥 deliver immediately
-//         },
-//         payload: {
-//           aps: {
-//             alert: {
-//               title: "🎉 Birthday Reminder",
-//               body
-//             },
-//             sound: "default",
-//             badge: 1
-//           }
-//         }
-//       }
-//     });
-
-//     return true;
-//   } catch (err) {
-//     console.error("❌ Error sending notification", err.code || err.message);
-
-//     if (err.code === "messaging/registration-token-not-registered") {
-//       return false; // cleanup invalid tokens
-//     }
-//     return false;
-//   }
-// }
 async function sendNotification(fcmToken, body, heading) {
+   if (!body || !heading) {
+        console.log('❌ Skip sending empty notification');
+        return;
+      }
   // console.log("hi");
   try {
     await messaging.send({
       token: fcmToken,
-      notification: {title: heading, body}, // for OS
-      data: {type: 'birthday', body, heading}, // for RN app
+      notification: {
+        title: heading, // ✅ MUST be title
+        body,
+      },
+      data: {
+        type: 'birthday',
+        title: heading, // ✅ same 
+        body,
+      },
       android: {
         priority: 'high',
-        notification: {
-          channelId: 'birthday_reminders',
-          sound: 'default',
-          priority: 'max',
-        },
       },
       apns: {
         headers: {'apns-priority': '10'},
@@ -475,6 +348,11 @@ async function checkHolidays() {
       const title = `🎉 ${event.name}`;
       const body = event.description;
 
+      if (!title || !body) {
+        console.log('❌ Skip sending empty notification');
+        return;
+      }
+
       // 🚀 SEND TO TOPIC
       await admin.messaging().send({
         topic: 'holiday',
@@ -495,45 +373,13 @@ async function checkHolidays() {
     console.error('❌ Error in holiday check:', error);
   }
 }
-checkHolidays();
 
-// async function sendNotification(fcmToken, body, heading) {
-//   try {
-//     await messaging.send({
-//       token: fcmToken,
-
-//       // ✅ DATA ONLY (VERY IMPORTANT)
-//       data: {
-//         title: heading,
-//         body: body,
-//         type: 'birthday',
-//       },
-//       android: {
-//         priority: 'high',
-//         notification: {
-//           channelId: 'birthday_reminders',
-//           sound: 'default',
-//           priority: 'max',
-//         },
-//       },
-//       apns: {
-//         headers: {'apns-priority': '10'},
-//         payload: {
-//           aps: {alert: {title: heading, body}, sound: 'default', badge: 1},
-//         },
-//       },
-//     });
-
-//     console.log('✅ Notification sent');
-//     return true;
-//   } catch (err) {
-//     console.error('❌ Error sending notification', err.code || err.message);
-//     return false;
-//   }
-// }
 
 // ===== Schedule job =====
 cron.schedule(CRON_SCHEDULE, checkBirthdays, {
+  timezone: TIMEZONE,
+});
+cron.schedule(CRON_SCHEDULE, checkHolidays, {
   timezone: TIMEZONE,
 });
 

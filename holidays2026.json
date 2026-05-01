@@ -1,201 +1,268 @@
 [
   {
     "date": "2026-01-01",
+    "month": "2026-01",
     "events": [
       {
         "name": "New Year's Day",
         "type": "global",
-        "description": "Celebration of the first day of the year."
+        "description": "Celebration of the first day of the year.",
+        "eventDate": "2026-01-01",
+        "day": "Thursday"
+      },
+      {
+        "name": "New Year's Day 222",
+        "type": "global",
+        "description": "Celebration of the first day of the year.",
+        "eventDate": "2026-01-01",
+        "day": "Thursday"
       }
     ]
   },
   {
     "date": "2026-01-14",
+    "month": "2026-01",
     "events": [
       {
         "name": "Makar Sankranti",
         "type": "hindu",
-        "description": "Harvest festival marking sun's transition."
+        "description": "Harvest festival marking sun's transition.",
+        "eventDate": "2026-01-14",
+        "day": "Wednesday"
       }
     ]
   },
   {
     "date": "2026-01-26",
+    "month": "2026-01",
     "events": [
       {
         "name": "Republic Day",
         "type": "national",
-        "description": "India adopted its Constitution in 1950."
+        "description": "India adopted its Constitution in 1950.",
+        "eventDate": "2026-01-26",
+        "day": "Monday"
       }
     ]
   },
   {
     "date": "2026-02-15",
+    "month": "2026-02",
     "events": [
       {
         "name": "Maha Shivratri",
         "type": "hindu",
-        "description": "Dedicated to Lord Shiva worship."
+        "description": "Dedicated to Lord Shiva worship.",
+        "eventDate": "2026-02-15",
+        "day": "Sunday"
       }
     ]
   },
   {
     "date": "2026-03-04",
+    "month": "2026-03",
     "events": [
       {
         "name": "Holika Dahan",
         "type": "hindu",
-        "description": "Bonfire ritual before Holi celebration."
+        "description": "Bonfire ritual before Holi celebration.",
+        "eventDate": "2026-03-04",
+        "day": "Wednesday"
       }
     ]
   },
   {
     "date": "2026-03-05",
+    "month": "2026-03",
     "events": [
       {
         "name": "Holi",
         "type": "hindu",
-        "description": "Festival of colors and joy."
+        "description": "Festival of colors and joy.",
+        "eventDate": "2026-03-05",
+        "day": "Thursday"
       }
     ]
   },
   {
     "date": "2026-03-22",
+    "month": "2026-03",
     "events": [
       {
         "name": "Gudi Padwa / Ugadi",
         "type": "hindu",
-        "description": "Hindu New Year celebration in many states."
+        "description": "Hindu New Year celebration in many states.",
+        "eventDate": "2026-03-22",
+        "day": "Sunday"
       }
     ]
   },
   {
     "date": "2026-04-02",
+    "month": "2026-04",
     "events": [
       {
         "name": "Ram Navami",
         "type": "hindu",
-        "description": "Birth of Lord Rama celebration."
+        "description": "Birth of Lord Rama celebration.",
+        "eventDate": "2026-04-02",
+        "day": "Thursday"
       }
     ]
   },
   {
     "date": "2026-04-14",
+    "month": "2026-04",
     "events": [
       {
         "name": "Ambedkar Jayanti",
         "type": "national",
-        "description": "Birth anniversary of Dr. B.R. Ambedkar."
+        "description": "Birth anniversary of Dr. B.R. Ambedkar.",
+        "eventDate": "2026-04-14",
+        "day": "Tuesday"
       }
     ]
   },
   {
     "date": "2026-05-01",
+    "month": "2026-05",
     "events": [
       {
         "name": "Labour Day",
         "type": "national",
-        "description": "Celebration of workers and labor rights."
+        "description": "Celebration of workers and labor rights.",
+        "eventDate": "2026-05-01",
+        "day": "Friday"
       }
     ]
   },
   {
     "date": "2026-07-21",
+    "month": "2026-07",
     "events": [
       {
         "name": "Guru Purnima",
         "type": "hindu",
-        "description": "Honoring spiritual and academic teachers."
+        "description": "Honoring spiritual and academic teachers.",
+        "eventDate": "2026-07-21",
+        "day": "Tuesday"
       }
     ]
   },
   {
     "date": "2026-08-15",
+    "month": "2026-08",
     "events": [
       {
         "name": "Independence Day",
         "type": "national",
-        "description": "India gained independence in 1947."
+        "description": "India gained independence in 1947.",
+        "eventDate": "2026-08-15",
+        "day": "Saturday"
       }
     ]
   },
   {
     "date": "2026-08-28",
+    "month": "2026-08",
     "events": [
       {
         "name": "Raksha Bandhan",
         "type": "hindu",
-        "description": "Festival of brother-sister bond."
+        "description": "Festival of brother-sister bond.",
+        "eventDate": "2026-08-28",
+        "day": "Friday"
       }
     ]
   },
   {
     "date": "2026-09-05",
+    "month": "2026-09",
     "events": [
       {
         "name": "Krishna Janmashtami",
         "type": "hindu",
-        "description": "Birth of Lord Krishna celebration."
+        "description": "Birth of Lord Krishna celebration.",
+        "eventDate": "2026-09-05",
+        "day": "Saturday"
       }
     ]
   },
   {
     "date": "2026-10-02",
+    "month": "2026-10",
     "events": [
       {
         "name": "Gandhi Jayanti",
         "type": "national",
-        "description": "Birth anniversary of Mahatma Gandhi."
+        "description": "Birth anniversary of Mahatma Gandhi.",
+        "eventDate": "2026-10-02",
+        "day": "Friday"
       }
     ]
   },
   {
     "date": "2026-10-20",
+    "month": "2026-10",
     "events": [
       {
         "name": "Dussehra",
         "type": "hindu",
-        "description": "Victory of good over evil."
+        "description": "Victory of good over evil.",
+        "eventDate": "2026-10-20",
+        "day": "Tuesday"
       }
     ]
   },
   {
     "date": "2026-11-08",
+    "month": "2026-11",
     "events": [
       {
         "name": "Diwali",
         "type": "hindu",
-        "description": "Festival of lights and prosperity."
+        "description": "Festival of lights and prosperity.",
+        "eventDate": "2026-11-08",
+        "day": "Sunday"
       }
     ]
   },
   {
     "date": "2026-11-09",
+    "month": "2026-11",
     "events": [
       {
         "name": "Govardhan Puja",
         "type": "hindu",
-        "description": "Worship of Lord Krishna lifting Govardhan hill."
+        "description": "Worship of Lord Krishna lifting Govardhan hill.",
+        "eventDate": "2026-11-09",
+        "day": "Monday"
       }
     ]
   },
   {
     "date": "2026-11-10",
+    "month": "2026-11",
     "events": [
       {
         "name": "Bhai Dooj",
         "type": "hindu",
-        "description": "Celebration of brother-sister bond."
+        "description": "Celebration of brother-sister bond.",
+        "eventDate": "2026-11-10",
+        "day": "Tuesday"
       }
     ]
   },
   {
     "date": "2026-12-25",
+    "month": "2026-12",
     "events": [
       {
         "name": "Christmas",
         "type": "global",
-        "description": "Celebration of birth of Jesus Christ."
+        "description": "Celebration of birth of Jesus Christ.",
+        "eventDate": "2026-12-25",
+        "day": "Friday"
       }
     ]
   }

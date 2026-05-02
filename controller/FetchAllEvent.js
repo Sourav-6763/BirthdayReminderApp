@@ -12,7 +12,7 @@ export const AllEvent = async (req, res, next) => {
   const today = new Date();
   const fullDate = today.toISOString().split('T')[0];
   const year = fullDate.split('-')[0];
-  const month =fullDate.split('-')[1];
+  const month = fullDate.split('-')[1];
   // console.log(year);
   try {
     if (data === 'Today') {
@@ -69,8 +69,28 @@ export const AllEvent = async (req, res, next) => {
         message: 'Holiday found successfully 🎉',
         payload: {mainData},
       });
-    } 
-    
+    } else if (data === 'Year') {
+      const snapshot = await db.collectionGroup('allHolidaysDay').get();
+
+       if (snapshot.empty) {
+        successResponse(res, {
+          statusCode: 200,
+          message: ' No Holiday found  🎉',
+          payload: {},
+        });
+        return;
+      }
+      let mainData=[];
+      snapshot.docs.forEach(doc => {
+        mainData.push(... doc.data().events);
+      });
+      // console.log(data); 
+      successResponse(res, {
+        statusCode: 200,
+        message: 'Holiday found successfully 🎉',
+        payload: {mainData},
+      });
+    }
   } catch (error) {
     next(error);
   }

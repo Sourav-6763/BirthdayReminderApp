@@ -261,10 +261,10 @@ async function checkBirthdays() {
 }
 
 async function sendNotification(fcmToken, body, heading) {
-   if (!body || !heading) {
-        console.log('❌ Skip sending empty notification');
-        return;
-      }
+  if (!body || !heading) {
+    console.log('❌ Skip sending empty notification');
+    return;
+  }
   // console.log("hi");
   try {
     await messaging.send({
@@ -275,7 +275,7 @@ async function sendNotification(fcmToken, body, heading) {
       },
       data: {
         type: 'birthday',
-        title: heading, // ✅ same 
+        title: heading, // ✅ same
         body,
       },
       android: {
@@ -320,15 +320,23 @@ async function sendNotification(fcmToken, body, heading) {
     return false;
   }
 }
-
+checkHolidays();
 async function checkHolidays() {
   try {
     const today = new Date().toISOString().split('T')[0]; // "2026-01-01"
-
-    console.log('🔍 Checking holiday for:', today);
+    const year = today.split('-')[0];
+    const month = today.split('-')[1];
+    console.log('🔍 Checking holiday for:', month);
 
     // 🔥 Get holiday doc
-    const snapshot = await db.collection('Holidays').doc(today).get();
+    const snapshot = await db
+      .collection('Holidays')
+      .doc(year)
+      .collection('allHolidaysMonth')
+      .doc(`${year}-${month}`)
+      .collection('allHolidaysDay')
+      .doc(today)
+      .get();
 
     if (!snapshot.exists) {
       console.log('❌ No holiday today');
@@ -373,7 +381,6 @@ async function checkHolidays() {
     console.error('❌ Error in holiday check:', error);
   }
 }
-
 
 // ===== Schedule job =====
 cron.schedule(CRON_SCHEDULE, checkBirthdays, {

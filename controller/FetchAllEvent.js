@@ -2,6 +2,7 @@ import axios from 'axios';
 import express from 'express';
 import {successResponse} from './ErrorSuccessResponse.js';
 import db from '../helper/fireBase.js';
+import {redis} from '../helper/redis.js';
 
 const app = express();
 app.use(express.json());
@@ -13,7 +14,22 @@ export const AllEvent = async (req, res, next) => {
   const fullDate = today.toISOString().split('T')[0];
   const year = fullDate.split('-')[0];
   const month = fullDate.split('-')[1];
-  // console.log(year);
+  const key = `events_${data}_${fullDate}`;
+  // await redis.del(key);
+  try {
+    const cache = await redis.get(key);
+    if (cache) {
+      return successResponse(res, {
+        statusCode: 200,
+        message: 'Holiday found successfully from cache 🎉',
+        payload: {mainData: cache},
+      });
+    }
+  } catch (error) {
+    console.log('Redis SET error:', error.message);
+  }
+  // await redis.del(key);
+
   try {
     if (data === 'Today') {
       const snapshort = await db
@@ -34,6 +50,11 @@ export const AllEvent = async (req, res, next) => {
           message: 'No Holidays found',
           payload: {mainData: []},
         });
+      }
+       try {
+        await redis.set(key, JSON.stringify(mainData), {ex: 86400});
+      } catch (err) {
+        console.log('Redis SET error:', err.message);
       }
       // console.log(mainData);
       return successResponse(res, {
@@ -56,7 +77,6 @@ export const AllEvent = async (req, res, next) => {
           message: ' No Holiday found  🎉',
           payload: {},
         });
-        return;
       }
       // console.log(snapshot.docs.data());
       let mainData = [];
@@ -64,7 +84,14 @@ export const AllEvent = async (req, res, next) => {
       snapshot.forEach(doc => {
         mainData.push(...(doc.data().events || []));
       });
-      successResponse(res, {
+      try {
+        await redis.set(key, JSON.stringify(mainData), {ex: 864000});
+      } catch (err) {
+        console.log('Redis SET error:', err.message);
+      }
+
+      // await redis.set(key, JSON.stringify(mainData), {ex: 864000});
+      return successResponse(res, {
         statusCode: 200,
         message: 'Holiday found successfully 🎉',
         payload: {mainData},
@@ -72,20 +99,24 @@ export const AllEvent = async (req, res, next) => {
     } else if (data === 'Year') {
       const snapshot = await db.collectionGroup('allHolidaysDay').get();
 
-       if (snapshot.empty) {
-        successResponse(res, {
+      if (snapshot.empty) {
+        return successResponse(res, {
           statusCode: 200,
           message: ' No Holiday found  🎉',
           payload: {},
         });
-        return;
       }
-      let mainData=[];
+      let mainData = [];
       snapshot.docs.forEach(doc => {
-        mainData.push(... doc.data().events);
+        mainData.push(...doc.data().events);
       });
-      // console.log(data); 
-      successResponse(res, {
+      try {
+        await redis.set(key, JSON.stringify(mainData), {ex: 864000});
+      } catch (err) {
+        console.log('Redis SET error:', err.message);
+      }
+      // console.log(data);
+      return successResponse(res, {
         statusCode: 200,
         message: 'Holiday found successfully 🎉',
         payload: {mainData},

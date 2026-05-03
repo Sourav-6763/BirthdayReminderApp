@@ -280,6 +280,9 @@ async function sendNotification(fcmToken, body, heading) {
       },
       android: {
         priority: 'high',
+        notification: {
+          priority: 'max',
+        },
       },
       apns: {
         headers: {'apns-priority': '10'},
@@ -320,7 +323,7 @@ async function sendNotification(fcmToken, body, heading) {
     return false;
   }
 }
-checkHolidays();
+// checkHolidays();
 async function checkHolidays() {
   try {
     const today = new Date().toISOString().split('T')[0]; // "2026-01-01"

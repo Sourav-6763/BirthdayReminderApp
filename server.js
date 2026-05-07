@@ -40,24 +40,60 @@ app.use('/sendBirthdayWish', wishrouter);
 app.use('/allEvent', eventRoute);
 app.use('/AiChat', AiChatRoute);
 
+app.post('/backup', async (req, res) => {
+  const {userid} = req.body;
+
+  try {
+    const snap = await db
+      .collectionGroup('allBirthdays')
+      .where('userId', '==', userid)
+      .orderBy('month')
+      .orderBy('day')
+      .get();
+
+    console.log('Docs found:', snap.size);
+
+    const data = [];
+
+    snap.forEach(doc => {
+      data.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+    return res.json({
+      success: true,
+      count: data.length,
+      data,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error fetching data',
+    });
+  }
+});
+
 // ===== Delete birthday =====
 app.delete('/delete-birthday', async (req, res) => {
-  // console.log(req.body);
-  const fullDate = req.body.date;
-  const day = Number(fullDate.split('-')[2]);
-  const month = Number(fullDate.split('-')[1]);
+  const fullDaymonth = `${req.body.day}-${req.body.month}`;
+  // const day = Number(fullDate.split('-')[2]);
+  // const month = Number(fullDate.split('-')[1]);
   const id = req.body.id;
-  // console.log(id);
+  // const userDevId=req.body.userId;
+  // // console.log(id);
   try {
     const docRef = db
       .collection('birthdays2')
-      .doc(`${day}-${month}`)
+      .doc(fullDaymonth)
       .collection('allBirthdays')
       .doc(id);
     const snapshort = await docRef.get();
     if (!snapshort.exists) {
       return res.status(404).json({message: 'Document not found'});
     }
+    // db.collection('users').doc(userDevId).
     // const res = await getDocs(q);
     await docRef.delete();
     return res.json({success: true, deleteId: id});
@@ -107,7 +143,7 @@ app.get('/check-holidays', (req, res) => {
 app.post('/save-user', async (req, res) => {
   try {
     const {fcmToken, userId, country, timezone} = req.body;
-    // console.log(req.body);
+    console.log(req.body);
     if (!fcmToken || !userId || !country || !timezone) {
       return res.status(400).json({error: 'Missing required fields'});
     }
@@ -130,8 +166,7 @@ app.post('/save-user', async (req, res) => {
 // ===== Add birthday =====
 app.post('/add-birthday', async (req, res) => {
   try {
-    const {name, month, day, fcmToken, timezone, country} = req.body;
-    // console.log(req.body);
+    const {name, month, day, fcmToken, timezone, country, userId} = req.body;
     if (!name || !month || !day || !fcmToken) {
       return res.status(400).json({error: 'Missing fields'});
     }
@@ -142,6 +177,7 @@ app.post('/add-birthday', async (req, res) => {
       .collection('allBirthdays')
       .add({
         name,
+        userId,
         month: parseInt(month),
         day: parseInt(day),
         fcmToken,
@@ -153,6 +189,22 @@ app.post('/add-birthday', async (req, res) => {
           birthday: null,
         },
       });
+    // const ref2 = await db.collection('users').doc(userId).get();
+    // await db
+    //   .collection('users')
+    //   .doc(userId)
+    //   .set(
+    //     {
+    //       birthdays: admin.firestore.FieldValue.arrayUnion(ref),
+    //     },
+    //     {merge: true},
+    //   );
+    // if (!ref2.exists) {
+    //   console.log('❌ User doc not found');
+    // } else {
+    //   console.log('✅ User data:', ref2.data());
+    // }
+
     res.json({message: 'Birthday saved!', id: ref.id});
   } catch (err) {
     res.status(500).json({error: 'Failed to save birthday'});

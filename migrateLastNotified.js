@@ -34,7 +34,7 @@ async function migrate() {
       }
     });
 
-    console.log(`Updated ${doc.id}`);
+    // console.log(`Updated ${doc.id}`);
   }
 
   console.log('Migration completed!');

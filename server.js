@@ -9,6 +9,7 @@ import eventRoute from './router/eventRoute.js';
 import axios from 'axios';
 import cors from 'cors';
 import AiChatRoute from './router/aiChatRoute.js';
+import {autoSendBirthdayWish} from './controller/AutoBirthdayWish.js';
 
 dotenv.config();
 
@@ -42,7 +43,8 @@ app.use('/AiChat', AiChatRoute);
 
 app.post('/backup', async (req, res) => {
   const {userid} = req.body;
-
+  const {token} = req.body;
+  // console.log(token);
   try {
     const snap = await db
       .collectionGroup('allBirthdays')
@@ -50,17 +52,33 @@ app.post('/backup', async (req, res) => {
       .orderBy('month')
       .orderBy('day')
       .get();
-
-    console.log('Docs found:', snap.size);
-
-    const data = [];
+    const batch = db.batch();
 
     snap.forEach(doc => {
+      batch.update(doc.ref, {
+        fcmToken: token,
+      });
+    });
+    await batch.commit();
+    // console.log('Docs found:', snap.size);
+    const snapupdatedData = await db
+      .collectionGroup('allBirthdays')
+      .where('userId', '==', userid)
+      .orderBy('month')
+      .orderBy('day')
+      .get();
+    const data = [];
+    // snap.forEach(doc => {
+    //   console.log(doc.data());
+    // });
+
+    snapupdatedData.forEach(doc => {
       data.push({
         id: doc.id,
         ...doc.data(),
       });
     });
+    // console.log(data);
     return res.json({
       success: true,
       count: data.length,
@@ -82,7 +100,7 @@ app.delete('/delete-birthday', async (req, res) => {
   // const month = Number(fullDate.split('-')[1]);
   const id = req.body.id;
   // const userDevId=req.body.userId;
-  // // console.log(id);
+  // console.log(req.body);
   try {
     const docRef = db
       .collection('birthdays2')
@@ -140,33 +158,44 @@ app.get('/check-holidays', (req, res) => {
   });
 });
 
-app.post('/save-user', async (req, res) => {
-  try {
-    const {fcmToken, userId, country, timezone} = req.body;
-    console.log(req.body);
-    if (!fcmToken || !userId || !country || !timezone) {
-      return res.status(400).json({error: 'Missing required fields'});
-    }
+// app.post('/save-user', async (req, res) => {
+//   try {
+//     const {fcmToken, userId, country, timezone} = req.body;
+//     console.log(req.body);
+//     if (!fcmToken || !userId || !country || !timezone) {
+//       return res.status(400).json({error: 'Missing required fields'});
+//     }
 
-    await db
-      .collection('users')
-      .doc(userId)
-      .set({fcmToken, country, timezone}, {merge: true});
+//     await db
+//       .collection('users')
+//       .doc(userId)
+//       .set({fcmToken, country, timezone}, {merge: true});
 
-    // ✅ IMPORTANT: send response
-    return res.json({message: 'User saved successfully'});
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      error: 'Server error',
-    });
-  }
-});
+//     // ✅ IMPORTANT: send response
+//     return res.json({message: 'User saved successfully'});
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({
+//       error: 'Server error',
+//     });
+//   }
+// });
 
 // ===== Add birthday =====
 app.post('/add-birthday', async (req, res) => {
   try {
-    const {name, month, day, fcmToken, timezone, country, userId} = req.body;
+    const {
+      name,
+      year,
+      month,
+      day,
+      fcmToken,
+      timezone,
+      country,
+      userId,
+      email,
+      phoneNumber,
+    } = req.body;
     if (!name || !month || !day || !fcmToken) {
       return res.status(400).json({error: 'Missing fields'});
     }
@@ -178,8 +207,11 @@ app.post('/add-birthday', async (req, res) => {
       .add({
         name,
         userId,
+        email,
+        phoneNumber,
         month: parseInt(month),
         day: parseInt(day),
+        year: parseInt(year),
         fcmToken,
         timezone,
         country,
@@ -219,7 +251,7 @@ function check1day2day0day(value) {
     month: now.getMonth() + 1,
   };
 }
-// checkBirthdays();
+checkBirthdays();
 // ===== Check birthdays with separate lastNotified for each type =====
 async function checkBirthdays() {
   const today = check1day2day0day(0);
@@ -256,6 +288,37 @@ async function checkBirthdays() {
     ) {
       continue;
     }
+    const dataForBirthdayWish = doc.data();
+
+    if (dataForBirthdayWish.email && dataForBirthdayWish.name) {
+      const result = await autoSendBirthdayWish({
+        email: dataForBirthdayWish.email,
+        name: dataForBirthdayWish.name,
+      });
+      if (!result.success) {
+        await sendNotification(
+          doc.data().fcmToken,
+          result.message,
+          'Birthday Reminder',
+        );
+        console.log('❌ Error:', result.message);
+      } else {
+        await sendNotification(
+          doc.data().fcmToken,
+          result.message,
+          'Birthday Reminder',
+        );
+        console.log('✅ Success:', result.message);
+      }
+    } else {
+      await sendNotification(
+        doc.data().fcmToken,
+        ' Automatic birthday wish not delivered.Email not added.Tap "Wish Now" to send it manually',
+        'Birthday Reminder',
+      );
+      // console.log('⚠️ Missing data:', dataForBirthdayWish);
+    }
+
     const message = `🎂 Today is ${doc.data().name}'s birthday! 🎉`;
     const todayStr = new Date().toISOString().split('T')[0];
     const data = await sendNotification(

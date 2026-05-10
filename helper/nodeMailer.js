@@ -53,7 +53,7 @@ const emailWithNodeMailer = async (emailData) => {
       }
     );
 
-    console.log("Email sent:", res.data);
+    // console.log("Email sent:", res.data);
     return res.data;
 
   } catch (error) {

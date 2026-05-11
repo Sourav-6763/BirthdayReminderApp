@@ -256,7 +256,7 @@ function check1day2day0day(value) {
     month: now.getMonth() + 1,
   };
 }
-// checkBirthdays();
+checkBirthdays();
 // ===== Check birthdays with separate lastNotified for each type =====
 async function checkBirthdays() {
   const today = check1day2day0day(0);
@@ -287,12 +287,12 @@ async function checkBirthdays() {
     const prevSaveYear = Number(
       doc.data().lastNotified?.birthday?.split('-')[0],
     );
-    if (
-      doc.data().lastNotified.birthday != null &&
-      prevSaveYear >= Currentyear
-    ) {
-      continue;
-    }
+    // if (
+    //   doc.data().lastNotified.birthday != null &&
+    //   prevSaveYear >= Currentyear
+    // ) {
+    //   continue;
+    // }
     const dataForBirthdayWish = doc.data();
 
     if (dataForBirthdayWish.email && dataForBirthdayWish.name) {
@@ -342,12 +342,12 @@ async function checkBirthdays() {
     const prevSaveYear = Number(
       doc.data().lastNotified?.onedays?.split('-')[0],
     );
-    if (
-      doc.data().lastNotified.onedays != null &&
-      prevSaveYear >= Currentyear
-    ) {
-      continue;
-    }
+    // if (
+    //   doc.data().lastNotified.onedays != null &&
+    //   prevSaveYear >= Currentyear
+    // ) {
+    //   continue;
+    // }
     const message = `🎈 Only 1 day left for ${doc.data().name}'s birthday!`;
     const todayStr = new Date().toISOString().split('T')[0];
     const data = await sendNotification(
@@ -389,20 +389,22 @@ async function sendNotification(fcmToken, body, heading) {
   try {
     await messaging.send({
       token: fcmToken,
-      notification: {
-        title: heading, // ✅ MUST be title
-        body,
-      },
+      // notification: {
+      //   title: heading, // ✅ MUST be title
+      //   body,
+      // },
       data: {
         type: 'birthday',
         title: heading, // ✅ same
         body,
+         id: Date.now().toString(),
       },
       android: {
         priority: 'high',
-        notification: {
-          priority: 'max',
-        },
+        // notification: {
+        //   priority: 'max',
+        // },
+        ttl: 1000 * 60 * 60 * 24,
       },
       apns: {
         headers: {'apns-priority': '10'},

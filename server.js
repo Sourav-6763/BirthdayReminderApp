@@ -288,18 +288,23 @@ async function checkBirthdays() {
       doc.data().lastNotified?.birthday?.split('-')[0],
     );
     if (
-      doc.data().lastNotified.birthday != null &&
+      doc.data().lastNotified?.birthday != null &&
       prevSaveYear >= Currentyear
     ) {
       continue;
     }
     const dataForBirthdayWish = doc.data();
     const decEmail=decryptText(dataForBirthdayWish.email);
-     const decName=decryptText(dataForBirthdayWish.name);
-    if (decEmail && decName) {
+    //  const decName=decryptText(dataForBirthdayWish.name);
+    //  console.log("Encrypted Email:", dataForBirthdayWish.email)
+// console.log("Decrypted Email:", decEmail)
+
+// console.log("Encrypted Name:", dataForBirthdayWish.name)
+// console.log("Decrypted Name:", decName)
+    if (decEmail && dataForBirthdayWish.name) {
       const result = await autoSendBirthdayWish({
         email: decEmail,
-        name: decName,
+        name: dataForBirthdayWish.name,
       });
       if (!result.success) {
         await sendNotification(

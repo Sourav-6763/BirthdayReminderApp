@@ -287,12 +287,12 @@ async function checkBirthdays() {
     const prevSaveYear = Number(
       doc.data().lastNotified?.birthday?.split('-')[0],
     );
-    // if (
-    //   doc.data().lastNotified.birthday != null &&
-    //   prevSaveYear >= Currentyear
-    // ) {
-    //   continue;
-    // }
+    if (
+      doc.data().lastNotified.birthday != null &&
+      prevSaveYear >= Currentyear
+    ) {
+      continue;
+    }
     const dataForBirthdayWish = doc.data();
 
     if (dataForBirthdayWish.email && dataForBirthdayWish.name) {
@@ -342,12 +342,12 @@ async function checkBirthdays() {
     const prevSaveYear = Number(
       doc.data().lastNotified?.onedays?.split('-')[0],
     );
-    // if (
-    //   doc.data().lastNotified.onedays != null &&
-    //   prevSaveYear >= Currentyear
-    // ) {
-    //   continue;
-    // }
+    if (
+      doc.data().lastNotified.onedays != null &&
+      prevSaveYear >= Currentyear
+    ) {
+      continue;
+    }
     const message = `🎈 Only 1 day left for ${doc.data().name}'s birthday!`;
     const todayStr = new Date().toISOString().split('T')[0];
     const data = await sendNotification(

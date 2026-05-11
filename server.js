@@ -10,6 +10,8 @@ import axios from 'axios';
 import cors from 'cors';
 import AiChatRoute from './router/aiChatRoute.js';
 import {autoSendBirthdayWish} from './controller/AutoBirthdayWish.js';
+import{ encryptText } from './helper/encrypedText.js';
+
 
 dotenv.config();
 
@@ -196,6 +198,9 @@ app.post('/add-birthday', async (req, res) => {
       email,
       phoneNumber,
     } = req.body;
+   const encryptedEmail=encryptText(email);
+   const encryptedPhoneNumber=encryptText(phoneNumber);
+   
     if (!name || !month || !day || !fcmToken) {
       return res.status(400).json({error: 'Missing fields'});
     }
@@ -207,8 +212,8 @@ app.post('/add-birthday', async (req, res) => {
       .add({
         name,
         userId,
-        email,
-        phoneNumber,
+        email:encryptedEmail,
+        phoneNumber:encryptedPhoneNumber,
         month: parseInt(month),
         day: parseInt(day),
         year: parseInt(year),
@@ -251,7 +256,7 @@ function check1day2day0day(value) {
     month: now.getMonth() + 1,
   };
 }
-checkBirthdays();
+// checkBirthdays();
 // ===== Check birthdays with separate lastNotified for each type =====
 async function checkBirthdays() {
   const today = check1day2day0day(0);

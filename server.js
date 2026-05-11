@@ -10,7 +10,7 @@ import axios from 'axios';
 import cors from 'cors';
 import AiChatRoute from './router/aiChatRoute.js';
 import {autoSendBirthdayWish} from './controller/AutoBirthdayWish.js';
-import{ encryptText } from './helper/encrypedText.js';
+import{ decryptText, encryptText } from './helper/encrypedText.js';
 
 
 dotenv.config();
@@ -294,11 +294,12 @@ async function checkBirthdays() {
       continue;
     }
     const dataForBirthdayWish = doc.data();
-
-    if (dataForBirthdayWish.email && dataForBirthdayWish.name) {
+    const decEmail=decryptText(dataForBirthdayWish.email);
+     const decName=decryptText(dataForBirthdayWish.name);
+    if (decEmail && decName) {
       const result = await autoSendBirthdayWish({
-        email: dataForBirthdayWish.email,
-        name: dataForBirthdayWish.name,
+        email: decEmail,
+        name: decName,
       });
       if (!result.success) {
         await sendNotification(

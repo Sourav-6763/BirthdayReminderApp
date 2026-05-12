@@ -10,8 +10,7 @@ import axios from 'axios';
 import cors from 'cors';
 import AiChatRoute from './router/aiChatRoute.js';
 import {autoSendBirthdayWish} from './controller/AutoBirthdayWish.js';
-import{ decryptText, encryptText } from './helper/encrypedText.js';
-
+import {decryptText, encryptText} from './helper/encrypedText.js';
 
 dotenv.config();
 
@@ -160,6 +159,88 @@ app.get('/check-holidays', (req, res) => {
   });
 });
 
+app.post('/edit-birthday', async (req, res) => {
+  // console.log(req.body.itemId);
+  // try {
+  const {
+    name,
+    year,
+    month,
+    oldDay,
+    oldMonth,
+    day,
+    fcmToken,
+    timezone,
+    country,
+    userId,
+    email,
+    category,
+    phoneNumber,
+    itemId,
+  } = req.body;
+
+  if (!name || !month || !day || !year) {
+    return res.status(400).json({error: 'Missing fields'});
+  }
+  const snapshortRef = await db
+    .collection('birthdays2')
+    .doc(`${oldDay}-${oldMonth}`)
+    .collection('allBirthdays')
+    .doc(itemId);
+  const data = await snapshortRef.get();
+  if (!data.exists) {
+    return res.status(404).json({message: 'Document not found'});
+  }
+  await snapshortRef.delete();
+
+  // await snapshortRef.delete();
+  const encryptedEmail = encryptText(email);
+  const encryptedPhoneNumber = encryptText(phoneNumber);
+  const ref = await db
+    .collection('birthdays2')
+    .doc(`${day}-${month}`)
+    .collection('allBirthdays')
+    .add({
+      name,
+      userId,
+      email: encryptedEmail,
+      phoneNumber: encryptedPhoneNumber,
+      month: parseInt(month),
+      day: parseInt(day),
+      year: parseInt(year),
+      fcmToken,
+      category,
+      timezone,
+      country,
+      lastNotified: {
+        onedays: null,
+        twoday: null,
+        birthday: null,
+      },
+    });
+
+  //   // const ref2 = await db.collection('users').doc(userId).get();
+  //   // await db
+  //   //   .collection('users')
+  //   //   .doc(userId)
+  //   //   .set(
+  //   //     {
+  //   //       birthdays: admin.firestore.FieldValue.arrayUnion(ref),
+  //   //     },
+  //   //     {merge: true},
+  //   //   );
+  //   // if (!ref2.exists) {
+  //   //   console.log('❌ User doc not found');
+  //   // } else {
+  //   //   console.log('✅ User data:', ref2.data());
+  //   // }
+
+  res.status(200).json({message: 'Birthday saved!', id: ref.id});
+  // } catch (err) {
+  //   res.status(500).json({error: 'Failed to save birthday'});
+  // }
+});
+
 // app.post('/save-user', async (req, res) => {
 //   try {
 //     const {fcmToken, userId, country, timezone} = req.body;
@@ -198,9 +279,9 @@ app.post('/add-birthday', async (req, res) => {
       email,
       phoneNumber,
     } = req.body;
-   const encryptedEmail=encryptText(email);
-   const encryptedPhoneNumber=encryptText(phoneNumber);
-   
+    const encryptedEmail = encryptText(email);
+    const encryptedPhoneNumber = encryptText(phoneNumber);
+
     if (!name || !month || !day || !fcmToken) {
       return res.status(400).json({error: 'Missing fields'});
     }
@@ -212,8 +293,8 @@ app.post('/add-birthday', async (req, res) => {
       .add({
         name,
         userId,
-        email:encryptedEmail,
-        phoneNumber:encryptedPhoneNumber,
+        email: encryptedEmail,
+        phoneNumber: encryptedPhoneNumber,
         month: parseInt(month),
         day: parseInt(day),
         year: parseInt(year),
@@ -294,13 +375,13 @@ async function checkBirthdays() {
       continue;
     }
     const dataForBirthdayWish = doc.data();
-    const decEmail=decryptText(dataForBirthdayWish.email);
+    const decEmail = decryptText(dataForBirthdayWish.email);
     //  const decName=decryptText(dataForBirthdayWish.name);
     //  console.log("Encrypted Email:", dataForBirthdayWish.email)
-// console.log("Decrypted Email:", decEmail)
+    // console.log("Decrypted Email:", decEmail)
 
-// console.log("Encrypted Name:", dataForBirthdayWish.name)
-// console.log("Decrypted Name:", decName)
+    // console.log("Encrypted Name:", dataForBirthdayWish.name)
+    // console.log("Decrypted Name:", decName)
     if (decEmail && dataForBirthdayWish.name) {
       const result = await autoSendBirthdayWish({
         email: decEmail,
@@ -403,7 +484,7 @@ async function sendNotification(fcmToken, body, heading) {
         type: 'birthday',
         title: heading, // ✅ same
         body,
-         id: Date.now().toString(),
+        id: Date.now().toString(),
       },
       android: {
         priority: 'high',

@@ -11,9 +11,9 @@ import cors from 'cors';
 import AiChatRoute from './router/aiChatRoute.js';
 import {autoSendBirthdayWish} from './controller/AutoBirthdayWish.js';
 import {decryptText, encryptText} from './helper/encrypedText.js';
-import {birthdayQueue} from './helper/queue.js';
+// import {birthdayQueue} from './helper/queue.js';
 
-import './helper/worker.js';
+// import './helper/worker.js';
 
 dotenv.config();
 
@@ -392,71 +392,71 @@ async function checkBirthdays() {
       //   );
       //   console.log('❌ Error:', result.message);
       if (result.success) {
-        await birthdayQueue.add(
-          'email-job',
-          {
-            token: doc.data().fcmToken,
-            message:result.message,
-            heading: 'Auto Email send',
-            // docPath: doc.ref.path,
-            type: 'email',
-            // todayStr,
-          },
-          {removeOnComplete: true, removeOnFail: true, attempts: 2},
-        );
-
-        // await sendNotification(
-        //   doc.data().fcmToken,
-        //   result.message,
-        //   'Birthday Reminder',
+        // await birthdayQueue.add(
+        //   'email-job',
+        //   {
+        //     token: doc.data().fcmToken,
+        //     message:result.message,
+        //     heading: 'Auto Email send',
+        //     // docPath: doc.ref.path,
+        //     type: 'email',
+        //     // todayStr,
+        //   },
+        //   {removeOnComplete: true, removeOnFail: true, attempts: 2},
         // );
-        // console.log('✅ Success:', result.message);
+
+        await sendNotification(
+          doc.data().fcmToken,
+          result.message,
+          'Birthday Reminder',
+        );
+        console.log('✅ Success:', result.message);
       }
     } else {
-       await birthdayQueue.add(
-          'email-job',
-          {
-            token: doc.data().fcmToken,
-            message:' Automatic birthday wish not delivered.Email not added.Tap "Wish Now" to send it manually',
-            heading: 'Auto Email send',
-            // docPath: doc.ref.path,
-            type: 'email',
-            // todayStr,
-          },
-          {removeOnComplete: true, removeOnFail: true, attempts: 2},
-        );
-      // await sendNotification(
-      //   doc.data().fcmToken,
-      //   ' Automatic birthday wish not delivered.Email not added.Tap "Wish Now" to send it manually',
-      //   'Birthday Reminder',
-      // );
-      // console.log('⚠️ Missing data:', dataForBirthdayWish);
+      //  await birthdayQueue.add(
+      //     'email-job',
+      //     {
+      //       token: doc.data().fcmToken,
+      //       message:' Automatic birthday wish not delivered.Email not added.Tap "Wish Now" to send it manually',
+      //       heading: 'Auto Email send',
+      //       // docPath: doc.ref.path,
+      //       type: 'email',
+      //       // todayStr,
+      //     },
+      //     {removeOnComplete: true, removeOnFail: true, attempts: 2},
+      //   );
+      await sendNotification(
+        doc.data().fcmToken,
+        ' Automatic birthday wish not delivered.Email not added.Tap "Wish Now" to send it manually',
+        'Birthday Reminder',
+      );
+      console.log('⚠️ Missing data:', dataForBirthdayWish);
     }
 
     const message = `🎂 Today is ${doc.data().name}'s birthday! 🎉`;
     const todayStr = new Date().toISOString().split('T')[0];
 
-    await birthdayQueue.add(
-      'birthday-job',
-      {
-        token: doc.data().fcmToken,
-        message,
-        heading: 'Birthday Reminder',
-        docPath: doc.ref.path,
-        type: 'birthday',
-        todayStr,
-      },
-      {removeOnComplete: true, removeOnFail: true, attempts: 2},
-    );
-
-    // const data = await sendNotification(
-    //   doc.data().fcmToken,
-    //   message,
-    //   'Birthday Reminder',
+    // await birthdayQueue.add(
+    //   'birthday-job',
+    //   {
+    //     token: doc.data().fcmToken,
+    //     message,
+    //     heading: 'Birthday Reminder',
+    //     docPath: doc.ref.path,
+    //     type: 'birthday',
+    //     todayStr,
+    //   },
+    //   {removeOnComplete: true, removeOnFail: true, attempts: 2},
     // );
-    // if (data) {
-    //   await doc.ref.update({'lastNotified.birthday': todayStr});
-    // }
+
+    const data = await sendNotification(
+      doc.data().fcmToken,
+      message,
+      'Birthday Reminder',
+    );
+    if (data) {
+      await doc.ref.update({'lastNotified.birthday': todayStr});
+    }
   }
 
   for (const doc of oneDaySnap.docs) {
@@ -474,27 +474,27 @@ async function checkBirthdays() {
     const message = `🎈 Only 1 day left for ${doc.data().name}'s birthday!`;
     const todayStr = new Date().toISOString().split('T')[0];
 
-    await birthdayQueue.add(
-      'birthday-job',
-      {
-        token: doc.data().fcmToken,
-        message,
-        heading: 'Birthday Reminder',
-        docPath: doc.ref.path,
-        type: 'onedays',
-        todayStr,
-      },
-      {removeOnComplete: true, removeOnFail: true, attempts: 2},
-    );
-
-    // const data = await sendNotification(
-    //   doc.data().fcmToken,
-    //   message,
-    //   'Birthday Reminder',
+    // await birthdayQueue.add(
+    //   'birthday-job',
+    //   {
+    //     token: doc.data().fcmToken,
+    //     message,
+    //     heading: 'Birthday Reminder',
+    //     docPath: doc.ref.path,
+    //     type: 'onedays',
+    //     todayStr,
+    //   },
+    //   {removeOnComplete: true, removeOnFail: true, attempts: 2},
     // );
-    // if (data) {
-    //   await doc.ref.update({'lastNotified.onedays': todayStr});
-    // }
+
+    const data = await sendNotification(
+      doc.data().fcmToken,
+      message,
+      'Birthday Reminder',
+    );
+    if (data) {
+      await doc.ref.update({'lastNotified.onedays': todayStr});
+    }
   }
 
   for (const doc of twoDaySnap.docs) {
@@ -507,27 +507,27 @@ async function checkBirthdays() {
     const message = `🎈 Only 2 day left for ${doc.data().name}'s birthday!`;
     const todayStr = new Date().toISOString().split('T')[0];
 
-    await birthdayQueue.add(
-      'birthday-job',
-      {
-        token: doc.data().fcmToken,
-        message,
-        heading: 'Birthday Reminder',
-        docPath: doc.ref.path,
-        type: 'twoday',
-        todayStr,
-      },
-      {removeOnComplete: true, removeOnFail: true, attempts: 2},
-    );
-
-    // const data = await sendNotification(
-    //   doc.data().fcmToken,
-    //   message,
-    //   'Birthday Reminder',
+    // await birthdayQueue.add(
+    //   'birthday-job',
+    //   {
+    //     token: doc.data().fcmToken,
+    //     message,
+    //     heading: 'Birthday Reminder',
+    //     docPath: doc.ref.path,
+    //     type: 'twoday',
+    //     todayStr,
+    //   },
+    //   {removeOnComplete: true, removeOnFail: true, attempts: 2},
     // );
-    // if (data) {
-    //   await doc.ref.update({'lastNotified.twoday': todayStr});
-    // }
+
+    const data = await sendNotification(
+      doc.data().fcmToken,
+      message,
+      'Birthday Reminder',
+    );
+    if (data) {
+      await doc.ref.update({'lastNotified.twoday': todayStr});
+    }
   }
 }
 

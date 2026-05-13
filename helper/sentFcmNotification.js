@@ -6,7 +6,7 @@ async function sendfcmNotification(fcmToken, body, heading) {
     console.log('❌ Skip sending empty notification');
     return;
   }
-  // console.log("hi");
+  console.log("hi",body);
   try {
     await messaging.send({
       token: fcmToken,

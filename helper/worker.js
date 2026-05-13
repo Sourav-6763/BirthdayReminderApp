@@ -11,6 +11,7 @@ const worker = new Worker(
     if (type === 'email') {
     //   console.log('this is email');
       await sendfcmNotification(token, message, heading);
+      return; 
     }
 
     const success = await sendfcmNotification(token, message, heading);

@@ -10,6 +10,7 @@
     "@google/genai": "^1.15.0",
     "@upstash/redis": "^1.37.0",
     "axios": "^1.11.0",
+    "bullmq": "^5.76.8",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.6.1",
@@ -17,6 +18,7 @@
     "firebase-admin": "^11.10.1",
     "holidayapi": "^6.0.1",
     "http-errors": "^2.0.0",
+    "ioredis": "^5.10.1",
     "node-cron": "^3.0.2",
     "nodemailer": "^7.0.5",
     "resend": "^6.12.2"

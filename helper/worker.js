@@ -2,7 +2,8 @@ import admin from 'firebase-admin';
 import {Worker} from 'bullmq';
 
 import connection from './redisconfig.js';
-import {sendNotification} from './sendNotification.js';
+import { sendfcmNotification } from './sendfcmNotification.js';
+
 
 // export function startBirthdayWorker() {
 const worker = new Worker(
@@ -10,10 +11,10 @@ const worker = new Worker(
   async job => {
     const {token, message, heading, docPath, type, todayStr} = job.data;
     if (type === 'email') {
-      await sendNotification(token, message, heading);
+      await sendfcmNotification(token, message, heading);
       return;
     }
-    const success = await sendNotification(token, message, heading);
+    const success = await sendfcmNotification(token, message, heading);
 
     if (success) {
       await admin
@@ -29,7 +30,19 @@ const worker = new Worker(
   {connection},
 );
 
-console.log('✅ Birthday worker started');
 
+
+worker.on("active", (job) => {
+  console.log("🚀 Processing:", job.id);
+});
+
+worker.on("completed", (job) => {
+  console.log("✅ Done:", job.id);
+});
+
+worker.on("failed", (job, err) => {
+  console.log("❌ Failed:", job?.id, err.message);
+});
 //   return worker;
 // }
+console.log('✅ Birthday worker started');

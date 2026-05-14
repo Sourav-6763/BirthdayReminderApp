@@ -2,7 +2,7 @@ import admin from "firebase-admin";
 
 const messaging = admin.messaging();
 
-export async function sendNotification(fcmToken, body, heading) {
+export async function sendfcmNotification(fcmToken, body, heading) {
   if (!body || !heading) {
     console.log("❌ Skip sending empty notification");
     return false;

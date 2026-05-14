@@ -12,6 +12,7 @@ import AiChatRoute from './router/aiChatRoute.js';
 import {autoSendBirthdayWish} from './controller/AutoBirthdayWish.js';
 import {decryptText, encryptText} from './helper/encrypedText.js';
 import './helper/worker.js'
+import { birthdayQueue } from './helper/queue.js';
 
 dotenv.config();
 
@@ -389,14 +390,14 @@ async function checkBirthdays() {
         name: dataForBirthdayWish.name,
       });
       if (!result.success) {
-        await sendNotification(
+        await sendpNotification(
           doc.data().fcmToken,
           result.message,
           'Birthday Reminder',
         );
         console.log('❌ Error:', result.message);
       } else {
-        await sendNotification(
+        await sendpNotification(
           doc.data().fcmToken,
           result.message,
           'Birthday Reminder',
@@ -404,7 +405,7 @@ async function checkBirthdays() {
         console.log('✅ Success:', result.message);
       }
     } else {
-      await sendNotification(
+      await sendpNotification(
         doc.data().fcmToken,
         ' Automatic birthday wish not delivered.Email not added.Tap "Wish Now" to send it manually',
         'Birthday Reminder',
@@ -525,7 +526,7 @@ async function checkBirthdays() {
   }
 }
 
-async function sendNotification(fcmToken, body, heading) {
+async function sendpNotification(fcmToken, body, heading) {
   if (!body || !heading) {
     console.log('❌ Skip sending empty notification');
     return;

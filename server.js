@@ -11,6 +11,7 @@ import cors from 'cors';
 import AiChatRoute from './router/aiChatRoute.js';
 import {autoSendBirthdayWish} from './controller/AutoBirthdayWish.js';
 import {decryptText, encryptText} from './helper/encrypedText.js';
+import './helper/worker.js'
 
 dotenv.config();
 
@@ -413,14 +414,33 @@ async function checkBirthdays() {
 
     const message = `🎂 Today is ${doc.data().name}'s birthday! 🎉`;
     const todayStr = new Date().toISOString().split('T')[0];
-    const data = await sendNotification(
-      doc.data().fcmToken,
-      message,
-      'Birthday Reminder',
+
+    await birthdayQueue.add(
+      'birthday-job',
+      {
+        token: doc.data().fcmToken,
+        message,
+        heading: 'Birthday Reminder',
+        docPath: doc.ref.path,
+        type: 'birthday',
+        todayStr,
+      },
+      {
+        jobId: `${doc.id}-birthday-${todayStr}`, // ✅ এখানে
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 2,
+      },
     );
-    if (data) {
-      await doc.ref.update({'lastNotified.birthday': todayStr});
-    }
+
+    // const data = await sendNotification(
+    //   doc.data().fcmToken,
+    //   message,
+    //   'Birthday Reminder',
+    // );
+    // if (data) {
+    //   await doc.ref.update({'lastNotified.birthday': todayStr});
+    // }
   }
 
   for (const doc of oneDaySnap.docs) {
@@ -437,14 +457,33 @@ async function checkBirthdays() {
     }
     const message = `🎈 Only 1 day left for ${doc.data().name}'s birthday!`;
     const todayStr = new Date().toISOString().split('T')[0];
-    const data = await sendNotification(
-      doc.data().fcmToken,
-      message,
-      'Birthday Reminder',
+
+    await birthdayQueue.add(
+      'birthday-job',
+      {
+        token: doc.data().fcmToken,
+        message,
+        heading: 'Birthday Reminder',
+        docPath: doc.ref.path,
+        type: 'onedays',
+        todayStr,
+      },
+      {
+        jobId: `${doc.id}-birthday-${todayStr}`, // ✅ এখানে
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 2,
+      },
     );
-    if (data) {
-      await doc.ref.update({'lastNotified.onedays': todayStr});
-    }
+
+    // const data = await sendNotification(
+    //   doc.data().fcmToken,
+    //   message,
+    //   'Birthday Reminder',
+    // );
+    // if (data) {
+    //   await doc.ref.update({'lastNotified.onedays': todayStr});
+    // }
   }
 
   for (const doc of twoDaySnap.docs) {
@@ -456,14 +495,33 @@ async function checkBirthdays() {
     }
     const message = `🎈 Only 2 day left for ${doc.data().name}'s birthday!`;
     const todayStr = new Date().toISOString().split('T')[0];
-    const data = await sendNotification(
-      doc.data().fcmToken,
-      message,
-      'Birthday Reminder',
+
+    await birthdayQueue.add(
+      'birthday-job',
+      {
+        token: doc.data().fcmToken,
+        message,
+        heading: 'Birthday Reminder',
+        docPath: doc.ref.path,
+        type: 'twoday',
+        todayStr,
+      },
+      {
+        jobId: `${doc.id}-birthday-${todayStr}`, // ✅ এখানে
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 2,
+      },
     );
-    if (data) {
-      await doc.ref.update({'lastNotified.twoday': todayStr});
-    }
+
+    // const data = await sendNotification(
+    //   doc.data().fcmToken,
+    //   message,
+    //   'Birthday Reminder',
+    // );
+    // if (data) {
+    //   await doc.ref.update({'lastNotified.twoday': todayStr});
+    // }
   }
 }
 

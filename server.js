@@ -69,15 +69,29 @@ app.post('/backup', async (req, res) => {
       .orderBy('month')
       .orderBy('day')
       .get();
+
     const data = [];
-    // snap.forEach(doc => {
+    // snapupdatedData.forEach(doc => {
     //   console.log(doc.data());
     // });
 
     snapupdatedData.forEach(doc => {
+      const docData = doc.data();
+      // console.log(docData);
+      let phoneNumber = null;
+      let email = null;
+      if (docData.phoneNumber) {
+        phoneNumber = decryptText(docData.phoneNumber);
+      }
+      if (docData.phoneNumber) {
+        email = decryptText(docData.email);
+      }
+      // console.log(phoneNumber);
       data.push({
         id: doc.id,
-        ...doc.data(),
+        ...docData,
+        phoneNumber,
+        email,
       });
     });
     // console.log(data);
@@ -219,22 +233,6 @@ app.post('/edit-birthday', async (req, res) => {
         birthday: null,
       },
     });
-
-  //   // const ref2 = await db.collection('users').doc(userId).get();
-  //   // await db
-  //   //   .collection('users')
-  //   //   .doc(userId)
-  //   //   .set(
-  //   //     {
-  //   //       birthdays: admin.firestore.FieldValue.arrayUnion(ref),
-  //   //     },
-  //   //     {merge: true},
-  //   //   );
-  //   // if (!ref2.exists) {
-  //   //   console.log('❌ User doc not found');
-  //   // } else {
-  //   //   console.log('✅ User data:', ref2.data());
-  //   // }
 
   res.status(200).json({message: 'Birthday saved!', id: ref.id});
   // } catch (err) {

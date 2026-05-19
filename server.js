@@ -6,7 +6,6 @@ import wishrouter from './router/sendmail.js';
 import {errorResponse} from './controller/ErrorSuccessResponse.js';
 import createError from 'http-errors';
 import eventRoute from './router/eventRoute.js';
-import axios from 'axios';
 import cors from 'cors';
 import AiChatRoute from './router/aiChatRoute.js';
 import {autoSendBirthdayWish} from './controller/AutoBirthdayWish.js';
@@ -277,6 +276,7 @@ app.post('/add-birthday', async (req, res) => {
       userId,
       email,
       phoneNumber,
+      category
     } = req.body;
     const encryptedEmail = encryptText(email);
     const encryptedPhoneNumber = encryptText(phoneNumber);
@@ -291,6 +291,7 @@ app.post('/add-birthday', async (req, res) => {
       .collection('allBirthdays')
       .add({
         name,
+        category,
         userId,
         email: encryptedEmail,
         phoneNumber: encryptedPhoneNumber,

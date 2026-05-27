@@ -18,7 +18,7 @@ export async function sendfcmNotification(fcmToken, body, heading) {
       },
     });
 
-    console.log("✅ Notification email  sent");
+    console.log("✅ Notification  sent ");
     return true;
   } catch (err) {
     console.log("❌ Notification failed:", err.message);

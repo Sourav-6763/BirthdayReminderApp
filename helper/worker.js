@@ -2,47 +2,55 @@ import admin from 'firebase-admin';
 import {Worker} from 'bullmq';
 
 import connection from './redisconfig.js';
-import { sendfcmNotification } from './sendfcmNotification.js';
+import {sendfcmNotification} from './sendfcmNotification.js';
+import {autoSendBirthdayWish} from '../controller/AutoBirthdayWish.js';
 
+export function startBirthdayWorker() {
+  const worker = new Worker(
+    'birthdayQueue',
+    async job => {
+      const {token, email, name, message, heading, docPath, type, todayStr} =
+        job.data;
+      // console.log('📦 Data:', job.data);
+      if (type === 'email') {
+        const emailResult = await autoSendBirthdayWish({email, name});
+        if (emailResult.success) {
+          await sendfcmNotification(
+            token,
+            `Automatic birthday wish sent to your friend ${name}`,
+            'Email Reminder',
+          );
+        } else {
+          await sendfcmNotification(
+            token,
+            `Automatic birthday wish not delivered.Email not added.Tap "Wish Now" to send it manually`,
+            'Email Reminder',
+          );
+        }
+        return;
+      }
+      const success = await sendfcmNotification(token, message, heading);
 
-// export function startBirthdayWorker() {
-const worker = new Worker(
-  'birthdayQueue',
-  async job => {
-    const {token, message, heading, docPath, type, todayStr} = job.data;
-    if (type === 'email') {
-      await sendfcmNotification(token, message, heading);
-      return;
-    }
-    const success = await sendfcmNotification(token, message, heading);
+      if (success) {
+        await admin
+          .firestore()
+          .doc(docPath)
+          .update({
+            [`lastNotified.${type}`]: todayStr,
+          });
 
-    if (success) {
-      await admin
-        .firestore()
-        .doc(docPath)
-        .update({
-          [`lastNotified.${type}`]: todayStr,
-        });
+        console.log('DB updated');
+      }
+      console.log('✅ Done job ID:', job.id);
+    },
 
-      console.log('DB updated');
-    }
-  },
-  {connection},
-);
-
-
-
-worker.on("active", (job) => {
-  console.log("🚀 Processing:", job.id);
-});
-
-worker.on("completed", (job) => {
-  console.log("✅ Done:", job.id);
-});
-
-worker.on("failed", (job, err) => {
-  console.log("❌ Failed:", job?.id, err.message);
-});
-//   return worker;
-// }
+    {
+      connection,
+     stalledInterval: 600000, // ⏱️ ১০ মিনিট পর পর স্টলড জব চেক করবে
+      lockDuration: 600000,
+    },
+  );
+  return worker;
+}
 console.log('✅ Birthday worker started');
+

@@ -11,6 +11,8 @@ import AiChatRoute from './router/aiChatRoute.js';
 import {autoSendBirthdayWish} from './controller/AutoBirthdayWish.js';
 import {decryptText, encryptText} from './helper/encrypedText.js';
 import {sendfcmNotification} from './helper/sendfcmNotification.js';
+import {birthdayQueue} from './helper/queue.js';
+import {startBirthdayWorker} from './helper/worker.js';
 
 dotenv.config();
 
@@ -276,7 +278,7 @@ app.post('/add-birthday', async (req, res) => {
       userId,
       email,
       phoneNumber,
-      category
+      category,
     } = req.body;
     const encryptedEmail = encryptText(email);
     const encryptedPhoneNumber = encryptText(phoneNumber);
@@ -337,7 +339,8 @@ function check1day2day0day(value) {
     month: now.getMonth() + 1,
   };
 }
-// checkBirthdays();
+
+checkBirthdays();
 // ===== Check birthdays with separate lastNotified for each type =====
 async function checkBirthdays() {
   const today = check1day2day0day(0);
@@ -376,6 +379,7 @@ async function checkBirthdays() {
     }
     const dataForBirthdayWish = doc.data();
     const decEmail = decryptText(dataForBirthdayWish.email);
+    const todayStr = new Date().toISOString().split('T')[0];
     //  const decName=decryptText(dataForBirthdayWish.name);
     //  console.log("Encrypted Email:", dataForBirthdayWish.email)
     // console.log("Decrypted Email:", decEmail)
@@ -383,42 +387,52 @@ async function checkBirthdays() {
     // console.log("Encrypted Name:", dataForBirthdayWish.name)
     // console.log("Decrypted Name:", decName)
     if (decEmail && dataForBirthdayWish.name) {
-      const result = await autoSendBirthdayWish({
-        email: decEmail,
-        name: dataForBirthdayWish.name,
-      });
-      // if (result.success) {
-      //   // await sendNotification(
-      //   //   doc.data().fcmToken,
-      //   //   result.message,
-      //   //   'Birthday Reminder',
-      //   // );
-      //   // console.log('❌ Error:', result.message);
-      // } else {
-      if (result.success) {
-        await sendfcmNotification(
-          doc.data().fcmToken,
-          `Automatic birthday wish sent to your friend ${dataForBirthdayWish.name} `,
-          'Email Reminder',
-        );
-        // await sendNotification(
-        //   doc.data().fcmToken,
-        //   result.message,
-        //   'Birthday Reminder',
-        // );
-        console.log('✅ Success:', result.message);
-      }
-    } else {
-      await sendfcmNotification(
-        doc.data().fcmToken,
-        ' Automatic birthday wish not delivered.Email not added.Tap "Wish Now" to send it manually',
-        'Email Reminder',
+      await birthdayQueue.add(
+        'birthday-job',
+        {
+          token: doc.data().fcmToken,
+          email: decEmail,
+          name: dataForBirthdayWish.name,
+          // message: `🎂 Today is ${dataForBirthdayWish.name}'s birthday! 🎉`,
+          heading: 'Birthday Reminder',
+          // docPath: doc.ref.path,
+          type: 'email', // 👈 টাইপ সেট করে দিন 'email'
+          todayStr,
+        },
+        {
+          removeOnComplete: {age: 3600},
+          removeOnFail: {age: 86400},
+        },
       );
-      // console.log('⚠️ Missing data:', dataForBirthdayWish);
     }
-
+    //ata original----------------------
+    //       const result = await autoSendBirthdayWish({
+    //         email: decEmail,
+    //         name: dataForBirthdayWish.name,
+    //       });
+    //       if (result.success) {
+    //         await sendfcmNotification(
+    //           doc.data().fcmToken,
+    //           `Automatic birthday wish sent to your friend ${dataForBirthdayWish.name} `,
+    //           'Email Reminder',
+    //         );
+    //         // await sendNotification(
+    //         //   doc.data().fcmToken,
+    //         //   result.message,
+    //         //   'Birthday Reminder',
+    //         // );
+    //         console.log('✅ Success:', result.message);
+    //       }
+    //     } else {
+    //       await sendfcmNotification(
+    //         doc.data().fcmToken,
+    //         ' Automatic birthday wish not delivered.Email not added.Tap "Wish Now" to send it manually',
+    //         'Email Reminder',
+    //       );
+    //     }
+    // //---------------------ai porjont age chilo
     const message = `🎂 Today is ${doc.data().name}'s birthday! 🎉`;
-    const todayStr = new Date().toISOString().split('T')[0];
+    // const todayStr = new Date().toISOString().split('T')[0];
     const data = await sendNotification(
       doc.data().fcmToken,
       message,
@@ -462,14 +476,31 @@ async function checkBirthdays() {
     }
     const message = `🎈 Only 2 day left for ${doc.data().name}'s birthday!`;
     const todayStr = new Date().toISOString().split('T')[0];
-    const data = await sendNotification(
-      doc.data().fcmToken,
-      message,
-      'Birthday Reminder',
+
+    await birthdayQueue.add(
+      'birthday-job',
+      {
+        token: doc.data().fcmToken,
+        message,
+        heading: 'Birthday Reminder',
+        docPath: doc.ref.path,
+        type: 'twoday',
+        todayStr,
+      },
+      {
+        removeOnComplete: {age: 3600}, // সফল হওয়া মাত্রই বা সর্বোচ্চ ১ ঘণ্টার মধ্যে মুছে যাবে
+        removeOnFail: {age: 86400}, // ফেইল হওয়া জব ২৪ ঘণ্টা পর অটো মুছে যাবে (যাতে লগ চেক করা যায়)
+        keepLogs: 0, // কোনো বাড়তি মেমরি বা লগ রেডিসে রাখবে না
+      },
     );
-    if (data) {
-      await doc.ref.update({'lastNotified.twoday': todayStr});
-    }
+    // const data = await sendNotification(
+    //   doc.data().fcmToken,
+    //   message,
+    //   'Birthday Reminder',
+    // );
+    // if (data) {
+    //   await doc.ref.update({'lastNotified.twoday': todayStr});
+    // }
   }
 }
 
@@ -607,7 +638,7 @@ cron.schedule(CRON_SCHEDULE, checkBirthdays, {
 cron.schedule(CRON_SCHEDULE, checkHolidays, {
   timezone: TIMEZONE,
 });
-
+startBirthdayWorker();
 // ===== Error handlers =====
 app.use((req, res, next) => {
   const err = createError(404, 'Route not found');

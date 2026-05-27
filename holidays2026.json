@@ -10,13 +10,6 @@
         "description": "Celebration of the first day of the year.",
         "eventDate": "2026-01-01",
         "day": "Thursday"
-      },
-      {
-        "name": "New Year's Day 222",
-        "type": "global",
-        "description": "Celebration of the first day of the year.",
-        "eventDate": "2026-01-01",
-        "day": "Thursday"
       }
     ]
   },
@@ -54,11 +47,53 @@
     "year": 2026,
     "events": [
       {
-        "name": "Maha Shivratri",
+        "name": "Maha Shivaratri",
         "type": "hindu",
         "description": "Dedicated to Lord Shiva worship.",
         "eventDate": "2026-02-15",
         "day": "Sunday"
+      }
+    ]
+  },
+  {
+    "date": "2026-02-19",
+    "month": "2026-02",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Shivaji Jayanti",
+        "type": "regional",
+        "description": "Birth anniversary of Chhatrapati Shivaji Maharaj.",
+        "eventDate": "2026-02-19",
+        "day": "Thursday"
+      }
+    ]
+  },
+  {
+    "date": "2026-02-28",
+    "month": "2026-02",
+    "year": 2026,
+    "events": [
+      {
+        "name": "National Science Day",
+        "type": "national",
+        "description": "Commemorating the discovery of the Raman Effect.",
+        "eventDate": "2026-02-28",
+        "day": "Saturday"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-03",
+    "month": "2026-03",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Holika Dahan",
+        "type": "hindu",
+        "description": "Bonfire ritual before Holi celebration.",
+        "eventDate": "2026-03-03",
+        "day": "Tuesday"
       }
     ]
   },
@@ -68,53 +103,81 @@
     "year": 2026,
     "events": [
       {
-        "name": "Holika Dahan",
+        "name": "Holi",
         "type": "hindu",
-        "description": "Bonfire ritual before Holi celebration.",
+        "description": "Festival of colors and joy.",
         "eventDate": "2026-03-04",
         "day": "Wednesday"
       }
     ]
   },
   {
-    "date": "2026-03-05",
+    "date": "2026-03-08",
     "month": "2026-03",
     "year": 2026,
     "events": [
       {
-        "name": "Holi",
-        "type": "hindu",
-        "description": "Festival of colors and joy.",
-        "eventDate": "2026-03-05",
-        "day": "Thursday"
-      }
-    ]
-  },
-  {
-    "date": "2026-03-22",
-    "month": "2026-03",
-    "year": 2026,
-    "events": [
-      {
-        "name": "Gudi Padwa / Ugadi",
-        "type": "hindu",
-        "description": "Hindu New Year celebration in many states.",
-        "eventDate": "2026-03-22",
+        "name": "Women's Day",
+        "type": "global",
+        "description": "International celebration of women's achievements.",
+        "eventDate": "2026-03-08",
         "day": "Sunday"
       }
     ]
   },
   {
-    "date": "2026-04-02",
-    "month": "2026-04",
+    "date": "2026-03-20",
+    "month": "2026-03",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Eid al-Fitr",
+        "type": "muslim",
+        "description": "Islamic festival marking the end of Ramadan.",
+        "eventDate": "2026-03-20",
+        "day": "Friday"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-26",
+    "month": "2026-03",
     "year": 2026,
     "events": [
       {
         "name": "Ram Navami",
         "type": "hindu",
         "description": "Birth of Lord Rama celebration.",
-        "eventDate": "2026-04-02",
+        "eventDate": "2026-03-26",
         "day": "Thursday"
+      }
+    ]
+  },
+  {
+    "date": "2026-03-31",
+    "month": "2026-03",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Mahavir Jayanti",
+        "type": "jain",
+        "description": "Birth anniversary of Lord Mahavira.",
+        "eventDate": "2026-03-31",
+        "day": "Tuesday"
+      }
+    ]
+  },
+  {
+    "date": "2026-04-03",
+    "month": "2026-04",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Good Friday",
+        "type": "christian",
+        "description": "Commemoration of the crucifixion of Jesus Christ.",
+        "eventDate": "2026-04-03",
+        "day": "Friday"
       }
     ]
   },
@@ -129,6 +192,41 @@
         "description": "Birth anniversary of Dr. B.R. Ambedkar.",
         "eventDate": "2026-04-14",
         "day": "Tuesday"
+      },
+      {
+        "name": "Baisakhi",
+        "type": "sikh",
+        "description": "Sikh New Year and harvest festival.",
+        "eventDate": "2026-04-14",
+        "day": "Tuesday"
+      }
+    ]
+  },
+  {
+    "date": "2026-04-15",
+    "month": "2026-04",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Vaisakhadi (Poila Boishakh)",
+        "type": "regional",
+        "description": "Bengali New Year celebration.",
+        "eventDate": "2026-04-15",
+        "day": "Wednesday"
+      }
+    ]
+  },
+  {
+    "date": "2026-04-22",
+    "month": "2026-04",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Earth Day",
+        "type": "global",
+        "description": "International event supporting environmental protection.",
+        "eventDate": "2026-04-22",
+        "day": "Wednesday"
       }
     ]
   },
@@ -143,11 +241,81 @@
         "description": "Celebration of workers and labor rights.",
         "eventDate": "2026-05-01",
         "day": "Friday"
+      },
+      {
+        "name": "Buddha Purnima",
+        "type": "buddhist",
+        "description": "Birth, enlightenment, and death of Gautama Buddha.",
+        "eventDate": "2026-05-01",
+        "day": "Friday"
       }
     ]
   },
   {
-    "date": "2026-07-21",
+    "date": "2026-05-10",
+    "month": "2026-05",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Mother's Day",
+        "type": "global",
+        "description": "Honoring mothers and motherhood (Second Sunday of May).",
+        "eventDate": "2026-05-10",
+        "day": "Sunday"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-05",
+    "month": "2026-06",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Environment Day",
+        "type": "global",
+        "description": "Global day for environmental awareness.",
+        "eventDate": "2026-06-05",
+        "day": "Friday"
+      }
+    ]
+  },
+  {
+    "date": "2026-06-21",
+    "month": "2026-06",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Yog Diwas",
+        "type": "global",
+        "description": "International Day of Yoga.",
+        "eventDate": "2026-06-21",
+        "day": "Sunday"
+      },
+      {
+        "name": "Father's Day",
+        "type": "global",
+        "description": "Honoring fathers and fatherhood (Third Sunday of June).",
+        "eventDate": "2026-06-21",
+        "day": "Sunday"
+      }
+    ]
+  },
+  {
+    "date": "2026-07-16",
+    "month": "2026-07",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Rath Yatra",
+        "type": "hindu",
+        "description": "Chariot festival of Lord Jagannath.",
+        "eventDate": "2026-07-16",
+        "day": "Thursday"
+      }
+    ]
+  },
+  {
+    "date": "2026-07-29",
     "month": "2026-07",
     "year": 2026,
     "events": [
@@ -155,8 +323,22 @@
         "name": "Guru Purnima",
         "type": "hindu",
         "description": "Honoring spiritual and academic teachers.",
-        "eventDate": "2026-07-21",
-        "day": "Tuesday"
+        "eventDate": "2026-07-29",
+        "day": "Wednesday"
+      }
+    ]
+  },
+  {
+    "date": "2026-02-02",
+    "month": "2026-08",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Friendship Day",
+        "type": "global",
+        "description": "Celebrating the bond of friendship (First Sunday of August).",
+        "eventDate": "2026-08-02",
+        "day": "Sunday"
       }
     ]
   },
@@ -189,16 +371,44 @@
     ]
   },
   {
-    "date": "2026-09-05",
+    "date": "2026-09-04",
     "month": "2026-09",
     "year": 2026,
     "events": [
       {
-        "name": "Krishna Janmashtami",
+        "name": "Janmashtami",
         "type": "hindu",
         "description": "Birth of Lord Krishna celebration.",
-        "eventDate": "2026-09-05",
-        "day": "Saturday"
+        "eventDate": "2026-09-04",
+        "day": "Friday"
+      }
+    ]
+  },
+  {
+    "date": "2026-09-14",
+    "month": "2026-09",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Ganesh Chaturthi",
+        "type": "hindu",
+        "description": "Festival celebrating the birth of Lord Ganesha.",
+        "eventDate": "2026-09-14",
+        "day": "Monday"
+      }
+    ]
+  },
+  {
+    "date": "2026-09-17",
+    "month": "2026-09",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Vishwakarma Puja",
+        "type": "hindu",
+        "description": "Worship of the divine architect, Lord Vishwakarma.",
+        "eventDate": "2026-09-17",
+        "day": "Thursday"
       }
     ]
   },
@@ -217,16 +427,114 @@
     ]
   },
   {
+    "date": "2026-10-11",
+    "month": "2026-10",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Navratri Starts",
+        "type": "hindu",
+        "description": "Beginning of the nine nights festival dedicated to Durga.",
+        "eventDate": "2026-10-11",
+        "day": "Sunday"
+      }
+    ]
+  },
+  {
+    "date": "2026-10-17",
+    "month": "2026-10",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Maha Shashthi",
+        "type": "hindu",
+        "description": "Sixth day of Durga Puja.",
+        "eventDate": "2026-10-17",
+        "day": "Saturday"
+      }
+    ]
+  },
+  {
+    "date": "2026-10-18",
+    "month": "2026-10",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Maha Saptami",
+        "type": "hindu",
+        "description": "Seventh day of Durga Puja.",
+        "eventDate": "2026-10-18",
+        "day": "Sunday"
+      }
+    ]
+  },
+  {
+    "date": "2026-10-19",
+    "month": "2026-10",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Maha Ashtami",
+        "type": "hindu",
+        "description": "Eighth day of Durga Puja.",
+        "eventDate": "2026-10-19",
+        "day": "Monday"
+      }
+    ]
+  },
+  {
     "date": "2026-10-20",
     "month": "2026-10",
     "year": 2026,
     "events": [
       {
-        "name": "Dussehra",
+        "name": "Maha Nabami",
         "type": "hindu",
-        "description": "Victory of good over evil.",
+        "description": "Ninth day of Durga Puja.",
         "eventDate": "2026-10-20",
         "day": "Tuesday"
+      }
+    ]
+  },
+  {
+    "date": "2026-10-21",
+    "month": "2026-10",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Maha Dashami / Dussehra",
+        "type": "hindu",
+        "description": "Victory of good over evil and conclusion of Durga Puja.",
+        "eventDate": "2026-10-21",
+        "day": "Wednesday"
+      }
+    ]
+  },
+  {
+    "date": "2026-10-29",
+    "month": "2026-10",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Karwa Chauth",
+        "type": "hindu",
+        "description": "Fast observed by married women for husbands' long life.",
+        "eventDate": "2026-10-29",
+        "day": "Thursday"
+      }
+    ]
+  },
+  {
+    "date": "2026-11-06",
+    "month": "2026-11",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Dhanteras",
+        "type": "hindu",
+        "description": "Festival marking the first day of Diwali.",
+        "eventDate": "2026-11-06",
+        "day": "Friday"
       }
     ]
   },
@@ -245,21 +553,7 @@
     ]
   },
   {
-    "date": "2026-11-09",
-    "month": "2026-11",
-    "year": 2026,
-    "events": [
-      {
-        "name": "Govardhan Puja",
-        "type": "hindu",
-        "description": "Worship of Lord Krishna lifting Govardhan hill.",
-        "eventDate": "2026-11-09",
-        "day": "Monday"
-      }
-    ]
-  },
-  {
-    "date": "2026-11-10",
+    "date": "2026-11-11",
     "month": "2026-11",
     "year": 2026,
     "events": [
@@ -267,7 +561,49 @@
         "name": "Bhai Dooj",
         "type": "hindu",
         "description": "Celebration of brother-sister bond.",
-        "eventDate": "2026-11-10",
+        "eventDate": "2026-11-11",
+        "day": "Wednesday"
+      }
+    ]
+  },
+  {
+    "date": "2026-11-15",
+    "month": "2026-11",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Chhath Puja (Evening Arghya)",
+        "type": "hindu",
+        "description": "Sun worship ritual during sunset.",
+        "eventDate": "2026-11-15",
+        "day": "Sunday"
+      }
+    ]
+  },
+  {
+    "date": "2026-11-16",
+    "month": "2026-11",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Chhath Puja (Morning Arghya)",
+        "type": "hindu",
+        "description": "Sun worship ritual during sunrise.",
+        "eventDate": "2026-11-16",
+        "day": "Monday"
+      }
+    ]
+  },
+  {
+    "date": "2026-11-24",
+    "month": "2026-11",
+    "year": 2026,
+    "events": [
+      {
+        "name": "Guru Nanak Jayanti",
+        "type": "sikh",
+        "description": "Birth anniversary of Guru Nanak Dev Ji.",
+        "eventDate": "2026-11-24",
         "day": "Tuesday"
       }
     ]

@@ -356,7 +356,7 @@ function check1day2day0day(value) {
 //   };
 // }
 
-checkBirthdays();
+// checkBirthdays();
 // ===== Check birthdays with separate lastNotified for each type =====
 async function checkBirthdays() {
   const today = check1day2day0day(0);
@@ -384,6 +384,8 @@ async function checkBirthdays() {
   for (const doc of todaySnap.docs) {
     const date = new Date();
     const Currentyear = date.getFullYear();
+
+   
     const prevSaveYear = Number(
       doc.data().lastNotified?.birthday?.split('-')[0],
     );
@@ -395,7 +397,7 @@ async function checkBirthdays() {
     }
     const dataForBirthdayWish = doc.data();
     const decEmail = decryptText(dataForBirthdayWish.email);
-    // const todayStr = new Date().toISOString().split('T')[0];
+    // const todayStr = new Date().toISOString().split('T')[0];---------age chilo
     // এটি সার্ভারের UTC ডেটকে বাদ দিয়ে নিখুঁত ইন্ডিয়ান/বাংলাদেশী YYYY-MM-DD ফরম্যাট দেবে
     const tzDate = new Date(
       new Date().toLocaleString('en-US', {timeZone: 'Asia/Kolkata'}),

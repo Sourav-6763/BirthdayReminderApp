@@ -332,13 +332,29 @@ app.post('/add-birthday', async (req, res) => {
 });
 
 function check1day2day0day(value) {
-  const now = new Date();
+  // সার্ভার যে দেশেই থাকুক, টাইম সবসময় Asia/Kolkata (IST) তে লক থাকবে
+  const timezone = 'Asia/Kolkata';
+  const now = new Date(
+    new Date().toLocaleString('en-US', {timeZone: timezone}),
+  );
+
+  // দিন যোগ বা বিয়োগ করা
   now.setDate(now.getDate() + value);
+
   return {
     day: now.getDate(),
-    month: now.getMonth() + 1,
+    month: now.getMonth() + 1, // JavaScript মাসের জন্য +1 ঠিক আছে
   };
 }
+
+// function check1day2day0day(value) {
+//   const now = new Date();
+//   now.setDate(now.getDate() + value);
+//   return {
+//     day: now.getDate(),
+//     month: now.getMonth() + 1,
+//   };
+// }
 
 checkBirthdays();
 // ===== Check birthdays with separate lastNotified for each type =====
@@ -379,16 +395,21 @@ async function checkBirthdays() {
     }
     const dataForBirthdayWish = doc.data();
     const decEmail = decryptText(dataForBirthdayWish.email);
-    const todayStr = new Date().toISOString().split('T')[0];
+    // const todayStr = new Date().toISOString().split('T')[0];
+    // এটি সার্ভারের UTC ডেটকে বাদ দিয়ে নিখুঁত ইন্ডিয়ান/বাংলাদেশী YYYY-MM-DD ফরম্যাট দেবে
+    const tzDate = new Date(
+      new Date().toLocaleString('en-US', {timeZone: 'Asia/Kolkata'}),
+    );
+    const todayStr = tzDate.toLocaleDateString('en-CA');
     //  const decName=decryptText(dataForBirthdayWish.name);
     //  console.log("Encrypted Email:", dataForBirthdayWish.email)
     // console.log("Decrypted Email:", decEmail)
 
     // console.log("Encrypted Name:", dataForBirthdayWish.name)
     // console.log("Decrypted Name:", decName)
-    if (decEmail && dataForBirthdayWish.name) {
+    if (decEmail || dataForBirthdayWish.name) {
       await birthdayQueue.add(
-        'birthday-job',
+        'birthday-job', 
         {
           token: doc.data().fcmToken,
           email: decEmail,
@@ -456,7 +477,11 @@ async function checkBirthdays() {
       continue;
     }
     const message = `🎈 Only 1 day left for ${doc.data().name}'s birthday!`;
-    const todayStr = new Date().toISOString().split('T')[0];
+    // এটি সার্ভারের UTC ডেটকে বাদ দিয়ে নিখুঁত ইন্ডিয়ান/বাংলাদেশী YYYY-MM-DD ফরম্যাট দেবে
+    const tzDate = new Date(
+      new Date().toLocaleString('en-US', {timeZone: 'Asia/Kolkata'}),
+    );
+    const todayStr = tzDate.toLocaleDateString('en-CA');
     const data = await sendNotification(
       doc.data().fcmToken,
       message,
@@ -475,7 +500,11 @@ async function checkBirthdays() {
       continue;
     }
     const message = `🎈 Only 2 day left for ${doc.data().name}'s birthday!`;
-    const todayStr = new Date().toISOString().split('T')[0];
+    // এটি সার্ভারের UTC ডেটকে বাদ দিয়ে নিখুঁত ইন্ডিয়ান/বাংলাদেশী YYYY-MM-DD ফরম্যাট দেবে
+    const tzDate = new Date(
+      new Date().toLocaleString('en-US', {timeZone: 'Asia/Kolkata'}),
+    );
+    const todayStr = tzDate.toLocaleDateString('en-CA');
 
     await birthdayQueue.add(
       'birthday-job',

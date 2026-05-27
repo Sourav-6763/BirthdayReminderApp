@@ -8,10 +8,10 @@ import {autoSendBirthdayWish} from '../controller/AutoBirthdayWish.js';
 export function startBirthdayWorker() {
   const worker = new Worker(
     'birthdayQueue',
-    async job => {
+    async job => { 
       const {token, email, name, message, heading, docPath, type, todayStr} =
         job.data;
-      // console.log('📦 Data:', job.data);
+      console.log('📦 Data:', job.data);
       if (type === 'email') {
         const emailResult = await autoSendBirthdayWish({email, name});
         if (emailResult.success) {

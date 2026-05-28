@@ -16,6 +16,13 @@ export async function sendfcmNotification(fcmToken, body, heading) {
         body,
         type: "birthday",
       },
+       android: {
+        priority: 'high',
+        // notification: {
+        //   priority: 'max',
+        // },
+        ttl: 1000 * 60 * 60 * 24,
+      },
     });
 
     console.log("✅ Notification  sent ");

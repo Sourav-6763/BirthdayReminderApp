@@ -356,7 +356,7 @@ function check1day2day0day(value) {
 //   };
 // } 
  
-checkBirthdays(); 
+// checkBirthdays(); 
 // ===== Check birthdays with separate lastNotified for each type =====
 async function checkBirthdays() {
   const today = check1day2day0day(0);

@@ -10,7 +10,7 @@ import cors from 'cors';
 import AiChatRoute from './router/aiChatRoute.js';
 import {autoSendBirthdayWish} from './controller/AutoBirthdayWish.js';
 import {decryptText, encryptText} from './helper/encrypedText.js';
-import {sendfcmNotification} from './helper/sendfcmNotification.js';
+// import {sendfcmNotification} from './helper/sendfcmNotification.js';
 // import {birthdayQueue} from './helper/queue.js';
 // import {startBirthdayWorker} from './helper/worker.js';
 
@@ -435,7 +435,7 @@ async function checkBirthdays() {
         name: dataForBirthdayWish.name,
       });
       if (result.success) {
-        await sendfcmNotification(
+        await sendNotification(
           doc.data().fcmToken,
           `Automatic birthday wish sent to your friend ${dataForBirthdayWish.name} `,
           'Email Reminder',
@@ -448,7 +448,7 @@ async function checkBirthdays() {
         console.log('✅ Success:', result.message);
       }
     } else {
-      await sendfcmNotification(
+      await sendNotification(
         doc.data().fcmToken,
         ' Automatic birthday wish not delivered.Email not added.Tap "Wish Now" to send it manually',
         'Email Reminder',

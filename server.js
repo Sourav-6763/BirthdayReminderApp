@@ -354,9 +354,9 @@ function check1day2day0day(value) {
 //     day: now.getDate(),
 //     month: now.getMonth() + 1,
 //   };
-// } 
- 
-// checkBirthdays(); 
+// }
+
+// checkBirthdays();
 // ===== Check birthdays with separate lastNotified for each type =====
 async function checkBirthdays() {
   const today = check1day2day0day(0);
@@ -479,9 +479,7 @@ async function checkBirthdays() {
     ) {
       continue;
     }
-    const message = `🎈 Only 1 day left for ${
-      doc.data().name
-    }'s birthday!`;
+    const message = `🎈 Only 1 day left for ${doc.data().name}'s birthday!`;
     const todayStr = new Date().toISOString().split('T')[0];
     // // এটি সার্ভারের UTC ডেটকে বাদ দিয়ে নিখুঁত ইন্ডিয়ান/বাংলাদেশী YYYY-MM-DD ফরম্যাট দেবে
     // const tzDate = new Date(
@@ -505,9 +503,7 @@ async function checkBirthdays() {
     if (doc.data().lastNotified.twoday != null && prevSaveYear >= Currentyear) {
       continue;
     }
-    const message = `🎈 Only 2 day left for ${
-      doc.data().name
-    }'s birthday!`;
+    const message = `🎈 Only 2 day left for ${doc.data().name}'s birthday!`;
     const todayStr = new Date().toISOString().split('T')[0];
     // এটি সার্ভারের UTC ডেটকে বাদ দিয়ে নিখুঁত ইন্ডিয়ান/বাংলাদেশী YYYY-MM-DD ফরম্যাট দেবে
     // const tzDate = new Date(
@@ -652,14 +648,18 @@ async function checkHolidays() {
       // 🚀 SEND TO TOPIC
       await admin.messaging().send({
         topic: 'holiday',
-        notification: {
-          title,
-          body,
-        },
+        // notification: {
+        //   title,
+        //   body,
+        // },
         data: {
           title,
           body,
           type: 'holiday',
+          id: Date.now().toString(),
+        },
+        android: {
+          priority: 'high',
         },
       });
 
